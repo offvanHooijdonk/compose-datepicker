@@ -25,6 +25,8 @@ import java.util.*
 @Composable
 fun DatePickerDialog(
     initialPickedDate: Date,
+    dateFrom: Date? = null,
+    dateTo: Date? = null,
     onPick: (day: Int, month: Int, year: Int) -> Unit,
     onDismissRequest: () -> Unit
 ) {
@@ -49,7 +51,7 @@ private fun DatePickerDialogLayout(
 
         val pagerState = rememberPagerState(pageCount = 3, initialPage = 0) // todo set range and start page to correspond potential or provided date range
 
-        HorizontalPager(verticalAlignment = Alignment.Top, state = pagerState) { page ->
+        HorizontalPager(verticalAlignment = Alignment.Top, state = pagerState) { page -> // todo to separate public fun
             DatePickLayout(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 monthOffset = getMonthOffset(initialPickedDate) + page,
@@ -76,7 +78,6 @@ private fun DatePickerDialogLayout(
             TextButton(onClick = {
                 val (d, m, y) = DateModel(pickedDate.value)
                 onPick(d, m, y)
-                onDismissRequest()
             }) {
                 Text(text = "OK")
             }

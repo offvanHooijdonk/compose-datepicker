@@ -1,6 +1,9 @@
-package by.offvanhooijdonk.compose.datepicker
+package by.offvanhooijdonk.compose.datepicker.ext
 
+import by.offvanhooijdonk.compose.datepicker.R
 import java.util.*
+
+internal const val DAYS_IN_WEEK = 7
 
 internal data class DateModel(val day: Int, val month: Int, val year: Int) {
 
@@ -77,20 +80,4 @@ internal fun isDateInRange(dateModel: DateModel, dateFrom: Date?, dateTo: Date?)
     dateModel.toCalendar().let { current ->
         (dateFrom?.time?.let { it <= current.timeInMillis } ?: true)
                 && (dateTo?.time?.let { it >= current.timeInMillis } ?: true)
-    }
-
-internal var Calendar.day: Int
-    get() = this.get(Calendar.DAY_OF_MONTH)
-    set(value) = this.set(Calendar.DAY_OF_MONTH, value)
-
-internal var Calendar.month: Int
-    get() = this.get(Calendar.MONTH)
-    set(value) = this.set(Calendar.MONTH, value)
-internal var Calendar.year: Int
-    get() = this.get(Calendar.YEAR)
-    set(value) = this.set(Calendar.YEAR, value)
-internal val Calendar.maxDays: Int get() = this.getActualMaximum(Calendar.DAY_OF_MONTH)
-internal val Calendar.dayOfWeek: Int // performing correction, cause `DAY_OF_WEEK` returns constants, where SUNDAY always 1, etc.
-    get() = get(Calendar.DAY_OF_WEEK).let { num ->
-        (num - (firstDayOfWeek - 1)).let { if (it <= 0) it + 7 else it }
     }

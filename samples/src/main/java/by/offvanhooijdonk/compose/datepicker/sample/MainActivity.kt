@@ -18,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import by.offvanhooijdonk.compose.datepicker.DatePickerDialog
+import by.offvanhooijdonk.compose.datepicker.dialog.DatePickerDialog
 import by.offvanhooijdonk.compose.datepicker.sample.theme.ComposedatepickerTheme
 import java.util.*
 

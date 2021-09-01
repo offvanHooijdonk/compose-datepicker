@@ -39,7 +39,7 @@ fun DatePickerDialog(
                 DatePickedHeader(dateModel = pickedDate.value)
                 Spacer(modifier = Modifier.height(12.dp))
 
-                DatePickerPager(initialPickedDate, dateFrom, dateTo,
+                DatePickerPager(DateModel(initialPickedDate), dateFrom, dateTo,
                     onDateSelected = { day, month, year ->
                         pickedDate.value = DateModel(day, month, year)
                     }
@@ -59,7 +59,7 @@ fun DatePickerDialog(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun DatePickerPager(
-    initialPickedDate: Date,
+    initialPickedDate: DateModel,
     dateFrom: Date? = null,
     dateTo: Date? = null, // todo implement Date To
     onDateSelected: (day: Int, month: Int, year: Int) -> Unit,
@@ -73,7 +73,7 @@ private fun DatePickerPager(
         DatePickerLayout(
             modifier = Modifier.padding(horizontal = 16.dp),
             monthOffset = getMonthOffset(initialPickedDate) + page,
-            currentPickedDate = initialPickedDate,
+            initialPickedDate = initialPickedDate.toCalendar().time,
             dateFrom = dateFrom ?: Date(),
             onSelect = { day, month, year ->
                 onDateSelected(day, month, year)
@@ -94,7 +94,7 @@ private fun DatePickedHeader(dateModel: DateModel) {
         Text(
             modifier = Modifier.padding(8.dp),
             text = DateFormat.getMediumDateFormat(LocalContext.current).format(dateModel.toCalendar().time),
-            color = MaterialTheme.colors.onSecondary,
+            color = MaterialTheme.colors.onPrimary,
             style = MaterialTheme.typography.h4
         )
     }
@@ -121,9 +121,9 @@ private fun DatePickerButtonsBlock(
     }
 }
 
-private fun getMonthOffset(initialPickDate: Date): Int {
+private fun getMonthOffset(initialPickDate: DateModel): Int {
     val (_, currentMonth, currentYear) = DateModel(Date())
-    val (_, pickedDateMonth, pickedDateYear) = DateModel(initialPickDate)
+    val (_, pickedDateMonth, pickedDateYear) = initialPickDate
     Log.w("datepickerlog", "pick: $pickedDateMonth, curr: $currentMonth")
     return pickedDateMonth - currentMonth + (pickedDateYear - currentYear) * 12
 }

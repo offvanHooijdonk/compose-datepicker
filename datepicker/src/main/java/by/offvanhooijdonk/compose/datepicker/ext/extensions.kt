@@ -18,3 +18,13 @@ internal val Calendar.dayOfWeek: Int // performing correction, cause `DAY_OF_WEE
         (num - (firstDayOfWeek - 1)).let { if (it <= 0) it + 7 else it }
     }
 internal fun Calendar.copy() = Calendar.getInstance().also { it.timeInMillis = this.timeInMillis }
+
+internal fun Date.toPlainDate(): Date {
+    return Calendar.getInstance().apply {
+        time = this@toPlainDate
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.time
+}

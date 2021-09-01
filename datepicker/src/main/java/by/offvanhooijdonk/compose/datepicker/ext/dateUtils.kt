@@ -14,6 +14,7 @@ internal data class DateModel(val day: Int, val month: Int, val year: Int) {
     fun isSameMonth(other: DateModel) = this.year == other.year && this.month == other.month
 
     fun toCalendar(): Calendar = Calendar.getInstance().apply {
+        timeInMillis = 0
         this.day = this@DateModel.day; this.month = this@DateModel.month; this.year = this@DateModel.year
     }
 }
@@ -76,8 +77,9 @@ internal val dayNames = listOf(
     R.string.day_saturday_short,
 )
 
-internal fun isDateInRange(dateModel: DateModel, dateFrom: Date?, dateTo: Date?) =
-    dateModel.toCalendar().let { current ->
-        (dateFrom?.time?.let { it <= current.timeInMillis } ?: true)
-                && (dateTo?.time?.let { it >= current.timeInMillis } ?: true)
+internal fun isDateInRange(dateModel: DateModel, dateFrom: Date?, dateTo: Date?): Boolean {
+    return dateModel.toCalendar().let { current ->
+        (dateFrom?.toPlainDate()?.time?.let { it <= current.timeInMillis } ?: true)
+                && (dateTo?.toPlainDate()?.time?.let { it >= current.timeInMillis } ?: true)
     }
+}

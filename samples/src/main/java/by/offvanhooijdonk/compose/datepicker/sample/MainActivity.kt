@@ -19,14 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.offvanhooijdonk.compose.datepicker.dialog.DatePickerDialog
-import by.offvanhooijdonk.compose.datepicker.sample.theme.ComposedatepickerTheme
+import by.offvanhooijdonk.compose.datepicker.sample.ui.theme.ComposeDatePickerTheme
 import java.util.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ComposedatepickerTheme {
+            ComposeDatePickerTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     DatePickerSamplesScreen()
                 }
@@ -70,7 +70,7 @@ fun DatePickerSamplesScreen() {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    ComposedatepickerTheme {
+    ComposeDatePickerTheme {
         DatePickerSamplesScreen()
     }
 }

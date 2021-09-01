@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.offvanhooijdonk.compose.datepicker.dialog.DatePickerDialog
+import by.offvanhooijdonk.compose.datepicker.sample.ext.createDate
+import by.offvanhooijdonk.compose.datepicker.sample.ext.toDateString
 import by.offvanhooijdonk.compose.datepicker.sample.ui.theme.ComposeDatePickerTheme
 import java.util.*
 
@@ -38,15 +40,17 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DatePickerSamplesScreen() {
     val isDialogShow = remember { mutableStateOf(true) }
-    val textDate = remember { mutableStateOf("-") }
+    val datePicked = remember { mutableStateOf(Date()) }
+    val textDate = remember(datePicked.value) { mutableStateOf(datePicked.value.toDateString()) }
 
     if (isDialogShow.value) {
         DatePickerDialog(
-            initialPickedDate = Date(),
+            initialPickedDate = datePicked.value,
             dateFrom = null,
             dateTo = null,
             onPick = { day, month, year ->
-                textDate.value = "$day $month $year"
+                //textDate.value = "$day $month $year"
+                datePicked.value = createDate(day, month, year)
                 isDialogShow.value = false
             },
             onDismissRequest = {

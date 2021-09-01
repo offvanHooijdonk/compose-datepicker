@@ -55,7 +55,7 @@ fun DatePickerLayout(
                 text = SimpleDateFormat(
                     "MMMM, yyyy",
                     Locale.getDefault()
-                ).format(now.time)
+                ).format(monthCalendar.time)
             ) // todo extract text format
         }
         Spacer(modifier = Modifier.height(12.dp))

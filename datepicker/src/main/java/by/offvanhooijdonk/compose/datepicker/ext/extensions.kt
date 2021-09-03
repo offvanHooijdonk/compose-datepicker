@@ -28,3 +28,9 @@ internal fun Date.toPlainDate(): Date {
         set(Calendar.MILLISECOND, 0)
     }.time
 }
+
+internal fun Date.plusMonths(monthsToAdd: Int): Date =
+    Calendar.getInstance().apply {
+        time = this@plusMonths
+        add(Calendar.MONTH, monthsToAdd)
+    }.time

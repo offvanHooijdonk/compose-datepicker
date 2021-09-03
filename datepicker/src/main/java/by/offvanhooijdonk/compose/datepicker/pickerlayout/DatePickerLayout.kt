@@ -32,7 +32,8 @@ import java.util.*
 @Composable
 fun DatePickerLayout(
     modifier: Modifier = Modifier,
-    monthOffset: Int = 0,
+    //monthOffset: Int = 0,
+    displayMonthDate: Date,
     initialPickedDate: Date,
     dateFrom: Date? = null,
     dateTo: Date? = null,
@@ -41,24 +42,20 @@ fun DatePickerLayout(
     val now = Calendar.getInstance()// current date
     val nowDate = DateModel(now)
     val pickedDate = remember { mutableStateOf(DateModel(initialPickedDate)) }
-    val monthCalendar = now.copy().apply { add(Calendar.MONTH, monthOffset) }
-    val displayedMonth = DateModel(
-        monthCalendar.day,
-        monthCalendar.month,
-        monthCalendar.year
-    )
+    val displayedMonth = DateModel(displayMonthDate)
 
-    val datesList = calculateDatesRange(displayedMonth.month, displayedMonth.year)
+    val datesList = calculateDatesRange(displayedMonth.month, displayedMonth.year) // todo fixate to 6 rows
     Column(modifier = modifier) {
+        Spacer(modifier = Modifier.height(8.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Text(
                 text = SimpleDateFormat(
                     "MMMM, yyyy",
                     Locale.getDefault()
-                ).format(monthCalendar.time)
+                ).format(displayMonthDate.time)
             ) // todo extract text format
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         LazyVerticalGrid(
             contentPadding = PaddingValues(0.dp),
@@ -155,6 +152,7 @@ fun Preview_DatePickLayout() {
     PreviewAppTheme(darkTheme = false) {
         DatePickerLayout(
             onSelect = { _, _, _ -> },
+            displayMonthDate = Date(),
             initialPickedDate = Calendar.getInstance().apply { add(Calendar.WEEK_OF_YEAR, 1) }.time
         )
     }

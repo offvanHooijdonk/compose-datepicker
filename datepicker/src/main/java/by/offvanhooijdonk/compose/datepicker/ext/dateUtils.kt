@@ -1,6 +1,9 @@
 package by.offvanhooijdonk.compose.datepicker.ext
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.integerResource
 import by.offvanhooijdonk.compose.datepicker.R
+import java.time.LocalDate
 import java.util.*
 
 internal const val DAYS_IN_WEEK = 7
@@ -16,6 +19,15 @@ internal data class DateModel(val day: Int, val month: Int, val year: Int) {
     fun toCalendar(): Calendar = Calendar.getInstance().apply {
         timeInMillis = 0
         this.day = this@DateModel.day; this.month = this@DateModel.month; this.year = this@DateModel.year
+    }
+
+    fun getDiffMonths(other: DateModel) =
+        this.month - other.month + (this.year - other.year) * getMaxMonths()
+
+    companion object {
+        private val localCalendar = Calendar.getInstance()
+
+        private fun getMaxMonths() = localCalendar.getActualMaximum(Calendar.MONTH) + 1 // +1 as 1st month index is 0
     }
 }
 
@@ -82,4 +94,10 @@ internal fun isDateInRange(dateModel: DateModel, dateFrom: Date?, dateTo: Date?)
         (dateFrom?.toPlainDate()?.time?.let { it <= current.timeInMillis } ?: true)
                 && (dateTo?.toPlainDate()?.time?.let { it >= current.timeInMillis } ?: true)
     }
+}
+
+internal object PickerSettings {
+    val maxYearsForward: Int
+        @Composable
+        get() = integerResource(id = R.integer.max_years_forward)
 }

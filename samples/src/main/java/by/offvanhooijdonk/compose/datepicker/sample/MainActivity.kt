@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ComposeDatePickerTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    DatePickerSamplesScreen()
+                    SamplesScreen()
                 }
             }
         }
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DatePickerSamplesScreen() {
+fun SamplesScreen() {
     val isDialogShow = remember { mutableStateOf(true) }
     val datePicked = remember { mutableStateOf(Date()) }
     val textDate = remember(datePicked.value) { mutableStateOf(datePicked.value.toDateString()) }
@@ -46,7 +46,6 @@ fun DatePickerSamplesScreen() {
     if (isDialogShow.value) {
         DatePickerDialog(
             initialPickedDate = datePicked.value,
-            dateFrom = null,
             dateTo = null,
             onPick = { day, month, year ->
                 //textDate.value = "$day $month $year"
@@ -75,6 +74,6 @@ fun DatePickerSamplesScreen() {
 @Composable
 fun DefaultPreview() {
     ComposeDatePickerTheme {
-        DatePickerSamplesScreen()
+        SamplesScreen()
     }
 }

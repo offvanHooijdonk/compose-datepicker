@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerLayout
 import by.offvanhooijdonk.compose.datepicker.ext.DateModel
+import by.offvanhooijdonk.compose.datepicker.ext.PickerSettings
+import by.offvanhooijdonk.compose.datepicker.ext.plusMonths
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -27,7 +29,7 @@ import java.util.*
 @Composable
 fun DatePickerDialog(
     initialPickedDate: Date,
-    dateFrom: Date? = null,
+    dateFrom: Date = Date(),
     dateTo: Date? = null,
     onPick: (day: Int, month: Int, year: Int) -> Unit,
     onDismissRequest: () -> Unit
@@ -37,9 +39,9 @@ fun DatePickerDialog(
             val pickedDate = remember { mutableStateOf(DateModel(initialPickedDate)) }
             Column {
                 DatePickedHeader(dateModel = pickedDate.value)
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                DatePickerPager(DateModel(initialPickedDate), dateFrom, dateTo,
+                DatePickerPager(initialPickedDate, dateFrom, dateTo,
                     onDateSelected = { day, month, year ->
                         pickedDate.value = DateModel(day, month, year)
                     }
@@ -58,23 +60,31 @@ fun DatePickerDialog(
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-private fun DatePickerPager(
-    initialPickedDate: DateModel,
-    dateFrom: Date? = null,
-    dateTo: Date? = null, // todo implement Date To
+fun DatePickerPager(
+    initialPickedDate: Date,
+    dateFrom: Date = Date(),
+    dateTo: Date? = null,
     onDateSelected: (day: Int, month: Int, year: Int) -> Unit,
 ) {
+    val dateModelFrom = DateModel(dateFrom)
+    val dateToActual = dateTo ?: getDefaultDateTo(dateModelFrom)
     val pagerState = rememberPagerState(
-        pageCount = 3,
-        initialPage = 0
-    ) // todo set range and start page to correspond potential or provided date range
+        pageCount = getMaxPages(dateModelFrom, DateModel(dateToActual)),
+        initialPage = getInitialPage(
+            now = DateModel(Date()),
+            dateFrom = DateModel(dateFrom),
+            pickedDate = DateModel(initialPickedDate)
+        )
+    )
 
-    HorizontalPager(verticalAlignment = Alignment.Top, state = pagerState) { page -> // todo to separate public fun
+    HorizontalPager(verticalAlignment = Alignment.Top, state = pagerState) { page ->
         DatePickerLayout(
             modifier = Modifier.padding(horizontal = 16.dp),
-            monthOffset = getMonthOffset(initialPickedDate) + page,
-            initialPickedDate = initialPickedDate.toCalendar().time,
-            dateFrom = dateFrom ?: Date(),
+            //monthOffset = /*getMonthOffset(dateModelFrom, initialPickedDate) +*/ page,
+            displayMonthDate = dateFrom.plusMonths(page),
+            initialPickedDate = initialPickedDate,
+            dateFrom = dateFrom,
+            dateTo = dateToActual,
             onSelect = { day, month, year ->
                 onDateSelected(day, month, year)
                 // todo if picked date beyond displayed month - set offset to show the month (if not greater than max offset)
@@ -92,10 +102,12 @@ private fun DatePickedHeader(dateModel: DateModel) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            modifier = Modifier.padding(8.dp),
-            text = DateFormat.getMediumDateFormat(LocalContext.current).format(dateModel.toCalendar().time),
+            modifier = Modifier.padding(12.dp),
+            text = DateFormat.format(DateFormat.getBestDateTimePattern(
+                Locale.getDefault(),
+                "EEMMMddyyyy"), dateModel.toCalendar().time).toString(), // todo extract format
             color = MaterialTheme.colors.onPrimary,
-            style = MaterialTheme.typography.h4
+            style = MaterialTheme.typography.h5
         )
     }
 }
@@ -121,14 +133,27 @@ private fun DatePickerButtonsBlock(
     }
 }
 
-private fun getMonthOffset(initialPickDate: DateModel): Int {
-    val (_, currentMonth, currentYear) = DateModel(Date())
-    val (_, pickedDateMonth, pickedDateYear) = initialPickDate
-    Log.w("datepickerlog", "pick: $pickedDateMonth, curr: $currentMonth")
-    return pickedDateMonth - currentMonth + (pickedDateYear - currentYear) * 12
+internal fun getInitialPage(now: DateModel, dateFrom: DateModel, pickedDate: DateModel): Int {
+    val offsetNow = now.getDiffMonths(dateFrom)
+    val offsetPicked = pickedDate.getDiffMonths(dateFrom)
+    return PAGER_START_INDEX + when {
+        offsetPicked >= 0 -> offsetPicked
+        offsetNow >= 0 -> offsetNow
+        else -> 0
+    }
 }
 
-@Preview
+@Composable
+internal fun getDefaultDateTo(dateFrom: DateModel): Date =
+    dateFrom.copy(year = dateFrom.year + PickerSettings.maxYearsForward).toCalendar().time
+
+
+internal fun getMaxPages(dateFrom: DateModel, dateTo: DateModel) =
+    dateTo.getDiffMonths(dateFrom)
+
+private const val PAGER_START_INDEX = 0
+
+@Preview(showSystemUi = true)
 @Composable
 fun Preview_datePicker() {
     PreviewAppTheme {

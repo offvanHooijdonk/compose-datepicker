@@ -1,4 +1,4 @@
-package by.offvanhooijdonk.compose.datepicker.sample.theme
+package by.offvanhooijdonk.compose.datepicker.sample.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

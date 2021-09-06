@@ -1,7 +1,6 @@
 package by.offvanhooijdonk.compose.datepicker.dialog
 
 import android.text.format.DateFormat
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,44 +11,41 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerLayout
-import by.offvanhooijdonk.compose.datepicker.ext.DateModel
 import by.offvanhooijdonk.compose.datepicker.ext.PickerSettings
-import by.offvanhooijdonk.compose.datepicker.ext.plusMonths
+import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerLayout
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import java.time.LocalDate
 import java.util.*
 
 @Composable
 fun DatePickerDialog(
-    initialPickedDate: Date,
-    dateFrom: Date = Date(),
-    dateTo: Date? = null,
-    onPick: (day: Int, month: Int, year: Int) -> Unit,
+    initialPickedDate: LocalDate,
+    dateFrom: LocalDate = LocalDate.now(),
+    dateTo: LocalDate? = null,
+    onPick: (LocalDate) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(shape = RoundedCornerShape(4.dp)) {
-            val pickedDate = remember { mutableStateOf(DateModel(initialPickedDate)) }
+            val pickedDate = remember { mutableStateOf(initialPickedDate) }
             Column {
                 DatePickedHeader(dateModel = pickedDate.value)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 DatePickerPager(initialPickedDate, dateFrom, dateTo,
-                    onDateSelected = { day, month, year ->
-                        pickedDate.value = DateModel(day, month, year)
+                    onDateSelected = {
+                        pickedDate.value = it
                     }
                 )
 
                 DatePickerButtonsBlock(onPositiveButtonClicked = {
-                    val (d, m, y) = pickedDate.value
-                    onPick(d, m, y)
+                    onPick(pickedDate.value)
                 }, onNegativeButtonClick = {
                     onDismissRequest()
                 })
@@ -61,19 +57,19 @@ fun DatePickerDialog(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun DatePickerPager(
-    initialPickedDate: Date,
-    dateFrom: Date = Date(),
-    dateTo: Date? = null,
-    onDateSelected: (day: Int, month: Int, year: Int) -> Unit,
+    initialPickedDate: LocalDate,
+    dateFrom: LocalDate = LocalDate.now(),
+    dateTo: LocalDate? = null,
+    onDateSelected: (LocalDate) -> Unit,
 ) {
-    val dateModelFrom = DateModel(dateFrom)
-    val dateToActual = dateTo ?: getDefaultDateTo(dateModelFrom)
+//    val dateModelFrom = DateModel(dateFrom)
+    val dateToActual = dateTo ?: getDefaultDateTo(dateFrom)
     val pagerState = rememberPagerState(
-        pageCount = getMaxPages(dateModelFrom, DateModel(dateToActual)),
+        pageCount = getMaxPages(dateFrom, dateToActual),
         initialPage = getInitialPage(
-            now = DateModel(Date()),
-            dateFrom = DateModel(dateFrom),
-            pickedDate = DateModel(initialPickedDate)
+            now = LocalDate.now(),
+            dateFrom = dateFrom,
+            pickedDate = initialPickedDate
         )
     )
 
@@ -85,8 +81,8 @@ fun DatePickerPager(
             initialPickedDate = initialPickedDate,
             dateFrom = dateFrom,
             dateTo = dateToActual,
-            onSelect = { day, month, year ->
-                onDateSelected(day, month, year)
+            onSelect = {
+                onDateSelected(it)
                 // todo if picked date beyond displayed month - set offset to show the month (if not greater than max offset)
             },
         )
@@ -144,7 +140,7 @@ internal fun getInitialPage(now: DateModel, dateFrom: DateModel, pickedDate: Dat
 }
 
 @Composable
-internal fun getDefaultDateTo(dateFrom: DateModel): Date =
+internal fun getDefaultDateTo(dateFrom: LocalDate): Date =
     dateFrom.copy(year = dateFrom.year + PickerSettings.maxYearsForward).toCalendar().time
 
 

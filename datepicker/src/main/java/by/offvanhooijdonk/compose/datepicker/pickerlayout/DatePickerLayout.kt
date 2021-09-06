@@ -26,6 +26,7 @@ import androidx.constraintlayout.compose.Dimension
 import by.offvanhooijdonk.compose.datepicker.ext.*
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -33,18 +34,17 @@ import java.util.*
 fun DatePickerLayout(
     modifier: Modifier = Modifier,
     //monthOffset: Int = 0,
-    displayMonthDate: Date,
-    initialPickedDate: Date,
-    dateFrom: Date? = null,
-    dateTo: Date? = null,
-    onSelect: (day: Int, month: Int, year: Int) -> Unit
+    displayMonth: LocalDate,
+    initialPickedDate: LocalDate,
+    dateFrom: LocalDate? = null,
+    dateTo: LocalDate? = null,
+    onSelect: (LocalDate) -> Unit
 ) {
     val now = Calendar.getInstance()// current date
-    val nowDate = DateModel(now)
-    val pickedDate = remember { mutableStateOf(DateModel(initialPickedDate)) }
-    val displayedMonth = DateModel(displayMonthDate)
+    val nowDate = LocalDate.now()
+    val pickedDate = remember { mutableStateOf(initialPickedDate) }
 
-    val datesList = calculateDatesRange(displayedMonth.month, displayedMonth.year) // todo fixate to 6 rows
+    val datesList = calculateDatesRange(displayMonth.monthValue, displayMonth.year) // todo fixate to 6 rows
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(8.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -52,7 +52,7 @@ fun DatePickerLayout(
                 text = SimpleDateFormat(
                     "MMMM, yyyy",
                     Locale.getDefault()
-                ).format(displayMonthDate.time)
+                ).format(displayMonth) // todo format
             ) // todo extract text format
         }
         Spacer(modifier = Modifier.height(16.dp))

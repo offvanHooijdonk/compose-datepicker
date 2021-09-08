@@ -8,19 +8,23 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import by.offvanhooijdonk.compose.datepicker.ext.PickerSettings
+import by.offvanhooijdonk.compose.datepicker.ext.diffMonths
 import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerLayout
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
@@ -77,7 +81,7 @@ fun DatePickerPager(
         DatePickerLayout(
             modifier = Modifier.padding(horizontal = 16.dp),
             //monthOffset = /*getMonthOffset(dateModelFrom, initialPickedDate) +*/ page,
-            displayMonthDate = dateFrom.plusMonths(page),
+            displayMonth = dateFrom.plusMonths(page.toLong()),
             initialPickedDate = initialPickedDate,
             dateFrom = dateFrom,
             dateTo = dateToActual,
@@ -90,7 +94,7 @@ fun DatePickerPager(
 }
 
 @Composable
-private fun DatePickedHeader(dateModel: DateModel) {
+private fun DatePickedHeader(dateModel: LocalDate) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,9 +103,9 @@ private fun DatePickedHeader(dateModel: DateModel) {
     ) {
         Text(
             modifier = Modifier.padding(12.dp),
-            text = DateFormat.format(DateFormat.getBestDateTimePattern(
-                Locale.getDefault(),
-                "EEMMMddyyyy"), dateModel.toCalendar().time).toString(), // todo extract format
+            text = dateModel.format(
+                DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEMMMddyyyy"))
+            ), // todo extract format
             color = MaterialTheme.colors.onPrimary,
             style = MaterialTheme.typography.h5
         )
@@ -129,9 +133,9 @@ private fun DatePickerButtonsBlock(
     }
 }
 
-internal fun getInitialPage(now: DateModel, dateFrom: DateModel, pickedDate: DateModel): Int {
-    val offsetNow = now.getDiffMonths(dateFrom)
-    val offsetPicked = pickedDate.getDiffMonths(dateFrom)
+internal fun getInitialPage(now: LocalDate, dateFrom: LocalDate, pickedDate: LocalDate): Int {
+    val offsetNow = dateFrom.diffMonths(now)
+    val offsetPicked = dateFrom.diffMonths(pickedDate)
     return PAGER_START_INDEX + when {
         offsetPicked >= 0 -> offsetPicked
         offsetNow >= 0 -> offsetNow
@@ -140,12 +144,12 @@ internal fun getInitialPage(now: DateModel, dateFrom: DateModel, pickedDate: Dat
 }
 
 @Composable
-internal fun getDefaultDateTo(dateFrom: LocalDate): Date =
-    dateFrom.copy(year = dateFrom.year + PickerSettings.maxYearsForward).toCalendar().time
+internal fun getDefaultDateTo(dateFrom: LocalDate): LocalDate =
+    dateFrom.plusYears(PickerSettings.maxYearsForward.toLong())
 
 
-internal fun getMaxPages(dateFrom: DateModel, dateTo: DateModel) =
-    dateTo.getDiffMonths(dateFrom)
+internal fun getMaxPages(dateFrom: LocalDate, dateTo: LocalDate): Int =
+    dateFrom.diffMonths(dateTo)
 
 private const val PAGER_START_INDEX = 0
 
@@ -154,8 +158,8 @@ private const val PAGER_START_INDEX = 0
 fun Preview_datePicker() {
     PreviewAppTheme {
         DatePickerDialog(
-            initialPickedDate = Date(),
-            onPick = { _, _, _ -> },
+            initialPickedDate = LocalDate.now(),
+            onPick = {},
             onDismissRequest = {})
     }
 }

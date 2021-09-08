@@ -26,33 +26,32 @@ import androidx.constraintlayout.compose.Dimension
 import by.offvanhooijdonk.compose.datepicker.ext.*
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DatePickerLayout(
     modifier: Modifier = Modifier,
-    //monthOffset: Int = 0,
-    displayMonthDate: Date,
-    initialPickedDate: Date,
-    dateFrom: Date? = null,
-    dateTo: Date? = null,
-    onSelect: (day: Int, month: Int, year: Int) -> Unit
+    displayMonth: LocalDate,
+    initialPickedDate: LocalDate,
+    dateFrom: LocalDate? = null,
+    dateTo: LocalDate? = null,
+    onSelect: (LocalDate) -> Unit
 ) {
-    val now = Calendar.getInstance()// current date
-    val nowDate = DateModel(now)
-    val pickedDate = remember { mutableStateOf(DateModel(initialPickedDate)) }
-    val displayedMonth = DateModel(displayMonthDate)
+    val nowDate = LocalDate.now()
+    val pickedDate = remember { mutableStateOf(initialPickedDate) }
 
-    val datesList = calculateDatesRange(displayedMonth.month, displayedMonth.year) // todo fixate to 6 rows
+    val datesList = calculateDatesRange(displayMonth.monthValue, displayMonth.year) // todo fixate to 6 rows
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(8.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Text(
-                text = SimpleDateFormat(
-                    "MMMM, yyyy",
-                    Locale.getDefault()
-                ).format(displayMonthDate.time)
+                text = displayMonth.format(
+                    DateTimeFormatter.ofPattern("MMMM yyyy")
+                )
             ) // todo extract text format
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -70,11 +69,11 @@ fun DatePickerLayout(
                         date = date,
                         isPicked = date == pickedDate.value,
                         isToday = date == nowDate,
-                        isCurrentMonth = date.isSameMonth(displayedMonth),
+                        isCurrentMonth = date.isSameMonth(displayMonth),
                         isCanPick = isDateInRange(date, dateFrom, dateTo),
                         onPick = {
                             pickedDate.value = it
-                            onSelect(it.day, it.month, it.year)
+                            onSelect(it)
                         }
                     )
                 }
@@ -86,12 +85,12 @@ fun DatePickerLayout(
 
 @Composable
 private fun DateItem(
-    date: DateModel,
+    date: LocalDate,
     isPicked: Boolean = false,
     isToday: Boolean = false,
     isCurrentMonth: Boolean = false,
     isCanPick: Boolean = true,
-    onPick: (DateModel) -> Unit = {}
+    onPick: (LocalDate) -> Unit = {}
 ) {
     ConstraintLayout(
         modifier = Modifier
@@ -114,7 +113,7 @@ private fun DateItem(
         }
 
         Text(
-            text = date.day.toString(),
+            text = date.dayOfMonth.toString(),
             modifier = Modifier
                 .constrainAs(text) {
                     parentAll()
@@ -151,9 +150,9 @@ private fun DayOfWeekItem(dayTitle: String) {
 fun Preview_DatePickLayout() {
     PreviewAppTheme(darkTheme = false) {
         DatePickerLayout(
-            onSelect = { _, _, _ -> },
-            displayMonthDate = Date(),
-            initialPickedDate = Calendar.getInstance().apply { add(Calendar.WEEK_OF_YEAR, 1) }.time
+            onSelect = {},
+            displayMonth = LocalDate.now(),
+            initialPickedDate = LocalDate.now().plusDays(7)
         )
     }
 }

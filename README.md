@@ -11,7 +11,8 @@ Implemented ✅ :
 * Current MaterialTheme applyes.
 
 Upcoming 🚀 :
-* Year selection layout
-* UI adjustments, header restyle
+* Adding Date Picker Settings object to encapsulate different UI modes 
+* Unit & tests
+* Bug fixes, UI adjustments
 
 Feel free to fork/use/pull request/whatever.

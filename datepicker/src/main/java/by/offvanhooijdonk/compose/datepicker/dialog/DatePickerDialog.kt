@@ -72,7 +72,7 @@ fun DatePickerPager(
     val initPage = getInitialPage(now = LocalDate.now(), dateFrom = dateFrom, pickedDate = initialPickedDate)
     val pagerState = rememberPagerState(
         pageCount = getMaxPages(dateFrom, dateToActual),
-        initialPage = initPage, initialOffscreenLimit = 3
+        initialPage = initPage
     )
     val coroutineScope = rememberCoroutineScope()
     val mode = remember { mutableStateOf(DatePickerMode.MONTHS) }

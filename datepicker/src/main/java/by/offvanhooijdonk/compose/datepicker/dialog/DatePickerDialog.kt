@@ -93,7 +93,6 @@ fun DatePickerPager(
             onSelect = {
                 pickedDate.value = it
                 onDateSelected(it)
-                // todo if picked date beyond displayed month - set offset to show the month (if not greater than max offset)
             },
             onYearChange = {
                 mode.value = DatePickerMode.MONTHS

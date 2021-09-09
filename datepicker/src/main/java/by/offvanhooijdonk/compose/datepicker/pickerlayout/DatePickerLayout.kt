@@ -14,10 +14,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +27,7 @@ import androidx.constraintlayout.compose.Dimension
 import by.offvanhooijdonk.compose.datepicker.R
 import by.offvanhooijdonk.compose.datepicker.ext.*
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
+import kotlinx.coroutines.async
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -48,7 +46,6 @@ fun DatePickerLayout(
 ) {
     val nowDate = LocalDate.now()
     val pickedDate = remember { mutableStateOf(initialPickedDate) }
-    val datesList = calculateDatesRange(displayDate)
 
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -63,10 +60,13 @@ fun DatePickerLayout(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        when (mode) {
+        when (mode) { // todo animate change
             DatePickerMode.MONTHS -> {
+                val datesList = remember { mutableStateOf(Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS) { null }.toList()) } // todo to const
+                LaunchedEffect(key1 = null) { datesList.value = async { calculateDatesRange(displayDate) }.await() }
+
                 DatePickerLayoutMonth(
-                    datesList = datesList,
+                    datesList = datesList.value,
                     pickedDate = pickedDate.value,
                     displayMonth = displayDate,
                     nowDate = nowDate,
@@ -118,7 +118,7 @@ private fun MonthLabel(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DatePickerLayoutMonth(
-    datesList: List<LocalDate>,
+    datesList: List<LocalDate?>,
     pickedDate: LocalDate,
     displayMonth: LocalDate,
     nowDate: LocalDate,
@@ -130,16 +130,16 @@ private fun DatePickerLayoutMonth(
         LazyVerticalGrid(
             cells = GridCells.Fixed(DAYS_IN_WEEK),
         ) {
-            items(getDaysLabels()) { titleRes ->
-                DayOfWeekItem(dayTitle = stringResource(titleRes))
+            items(weekDaysNames) { dayName ->
+                DayOfWeekItem(dayTitle = dayName)
             }
             items(items = datesList) { date ->
                 DateItem(
                     date = date,
                     isPicked = date == pickedDate,
                     isToday = date == nowDate,
-                    isCurrentMonth = date.isSameMonth(displayMonth),
-                    isCanPick = isDateInRange(date, dateFrom, dateTo),
+                    isCurrentMonth = date?.isSameMonth(displayMonth) ?: false,
+                    isCanPick = date?.let { isDateInRange(date, dateFrom, dateTo) } ?: false,
                     onPick = {
                         onSelect(it)
                     }
@@ -189,7 +189,7 @@ private fun DatePickerLayoutYears(
 
 @Composable
 private fun DateItem(
-    date: LocalDate,
+    date: LocalDate?,
     isPicked: Boolean = false,
     isToday: Boolean = false,
     isCurrentMonth: Boolean = false,
@@ -200,7 +200,7 @@ private fun DateItem(
         modifier = Modifier
             .padding(2.dp)
             .clickable(enabled = isCanPick) {
-                onPick(date)
+                date?.let { onPick(it) }
             }
     ) {
         val (shape, text) = createRefs()
@@ -217,7 +217,7 @@ private fun DateItem(
         }
 
         Text(
-            text = date.dayOfMonth.toString(),
+            text = date?.dayOfMonth?.toString() ?: "", // todo any better
             modifier = Modifier
                 .constrainAs(text) {
                     parentAll()

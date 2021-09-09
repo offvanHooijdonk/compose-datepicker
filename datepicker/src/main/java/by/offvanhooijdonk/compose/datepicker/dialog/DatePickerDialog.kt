@@ -1,6 +1,7 @@
 package by.offvanhooijdonk.compose.datepicker.dialog
 
 import android.text.format.DateFormat
+import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -16,6 +17,7 @@ import androidx.compose.ui.window.Dialog
 import by.offvanhooijdonk.compose.datepicker.ext.PickerSettings
 import by.offvanhooijdonk.compose.datepicker.ext.diffMonths
 import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerLayout
+import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerMode
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -67,20 +69,26 @@ fun DatePickerPager(
     val pickedDate = remember { mutableStateOf(initialPickedDate) }
     val dateToActual = dateTo ?: getDefaultDateTo(dateFrom)
 
-    val initPage = getInitialPage(now = LocalDate.now(),dateFrom = dateFrom,pickedDate = initialPickedDate)
+    val initPage = getInitialPage(now = LocalDate.now(), dateFrom = dateFrom, pickedDate = initialPickedDate)
     val pagerState = rememberPagerState(
         pageCount = getMaxPages(dateFrom, dateToActual),
         initialPage = initPage, initialOffscreenLimit = 3
     )
     val coroutineScope = rememberCoroutineScope()
+    val mode = remember { mutableStateOf(DatePickerMode.MONTHS) }
 
-    HorizontalPager(verticalAlignment = Alignment.Top, state = pagerState,) { page ->
+    HorizontalPager(
+        verticalAlignment = Alignment.Top,
+        state = pagerState,
+        dragEnabled = mode.value == DatePickerMode.MONTHS
+    ) { page ->
         val displayDate = dateFrom.plusMonths(page.toLong())
         DatePickerLayout(
             modifier = Modifier.padding(horizontal = 16.dp),
             displayDate = displayDate,
             initialPickedDate = pickedDate.value,
             dateFrom = dateFrom,
+            mode = mode.value,
             dateTo = dateToActual,
             onSelect = {
                 pickedDate.value = it
@@ -88,10 +96,14 @@ fun DatePickerPager(
                 // todo if picked date beyond displayed month - set offset to show the month (if not greater than max offset)
             },
             onYearChange = {
+                mode.value = DatePickerMode.MONTHS
                 coroutineScope.launch {
                     val newPage = getPageWithYear(dateFrom, displayDate, it)
                     pagerState.animateScrollToPage(newPage)
                 }
+            },
+            onModeToggle = {
+                mode.value = if (mode.value == DatePickerMode.MONTHS) DatePickerMode.YEARS else DatePickerMode.MONTHS
             }
         )
     }

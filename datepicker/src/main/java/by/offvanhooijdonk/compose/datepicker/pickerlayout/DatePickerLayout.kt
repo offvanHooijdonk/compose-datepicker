@@ -41,13 +41,14 @@ fun DatePickerLayout(
     initialPickedDate: LocalDate,
     dateFrom: LocalDate? = null,
     dateTo: LocalDate? = null,
+    mode: DatePickerMode = DatePickerMode.MONTHS,
     onSelect: (LocalDate) -> Unit,
-    onYearChange: (Int) -> Unit = {}
+    onYearChange: (Int) -> Unit = {},
+    onModeToggle: () -> Unit = {}
 ) {
     val nowDate = LocalDate.now()
     val pickedDate = remember { mutableStateOf(initialPickedDate) }
     val datesList = calculateDatesRange(displayDate)
-    val mode = remember { mutableStateOf(DatePickerMode.MONTHS) }
 
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -55,14 +56,14 @@ fun DatePickerLayout(
             MonthLabel(
                 displayMonth = displayDate,
                 modesEnabled = true,
-                mode = mode.value
+                mode = mode
             ) { // todo change [modesEnabled] to settings when implemented
-                mode.value = if (mode.value == DatePickerMode.MONTHS) DatePickerMode.YEARS else DatePickerMode.MONTHS
+                onModeToggle()
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        when (mode.value) {
+        when (mode) {
             DatePickerMode.MONTHS -> {
                 DatePickerLayoutMonth(
                     datesList = datesList,
@@ -84,7 +85,6 @@ fun DatePickerLayout(
                     displayYear = displayDate.year,
                     onSelect = {
                         onYearChange(it)
-                        mode.value = DatePickerMode.MONTHS
                     }
                 )
             }
@@ -261,7 +261,7 @@ fun Preview_DatePickLayout() {
     }
 }
 
-private enum class DatePickerMode {
+enum class DatePickerMode {
     MONTHS, YEARS
 }
 

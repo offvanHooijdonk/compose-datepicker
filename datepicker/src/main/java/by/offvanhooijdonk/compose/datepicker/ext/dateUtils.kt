@@ -10,12 +10,14 @@ import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
 import java.util.*
 
+internal const val MAX_WEEKS = 6
 internal val DAYS_IN_WEEK = DayOfWeek.values().size
+internal val emptyPlaceholderMonth: List<LocalDate?> = Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS, init = {null}).toList()
 
 internal fun calculateDatesRange(date: LocalDate): List<LocalDate?> { // todo break into functions for testability
     // add all days of current month
     val monthDate = date.with(TemporalAdjusters.firstDayOfMonth())
-    val dates = LinkedList<LocalDate?>()//mutableListOf<LocalDate>()
+    val dates = LinkedList<LocalDate?>()
     dates.addAll(Array(monthDate.lengthOfMonth()) { monthDate.withDayOfMonth(it + 1) })
 
     // add days before 1st date to complete the week
@@ -41,7 +43,6 @@ internal fun calculateDatesRange(date: LocalDate): List<LocalDate?> { // todo br
     return dates
 }
 
-internal const val MAX_WEEKS = 6
 private fun createExtraWeekRows(monthDate: LocalDate): List<LocalDate?> {
     val extraWeeksNum = MAX_WEEKS - getWeeksNumber(monthDate)
     return if (extraWeeksNum > 0) {

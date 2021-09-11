@@ -26,7 +26,8 @@ import androidx.constraintlayout.compose.Dimension
 import by.offvanhooijdonk.compose.datepicker.R
 import by.offvanhooijdonk.compose.datepicker.ext.*
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -61,8 +62,12 @@ fun DatePickerLayout(
 
         when (mode) { // todo animate change
             DatePickerMode.MONTHS -> {
-                val datesList = remember { mutableStateOf(Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS) { null }.toList()) } // todo to const
-                LaunchedEffect(key1 = null) { datesList.value = async { calculateDatesRange(displayDate) }.await() }
+                val datesList = remember { mutableStateOf(emptyPlaceholderMonth) } // todo to const
+                LaunchedEffect(key1 = null) { datesList.value =
+                    withContext(Dispatchers.Default) {
+                        calculateDatesRange(displayDate)
+                    }
+                }
 
                 DatePickerLayoutMonth(
                     datesList = datesList.value,

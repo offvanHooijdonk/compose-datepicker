@@ -6,6 +6,7 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import by.offvanhooijdonk.compose.datepicker.R
+import by.offvanhooijdonk.compose.datepicker.dialog.getDefaultDateTo
 import by.offvanhooijdonk.compose.datepicker.ext.*
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import kotlinx.coroutines.Dispatchers
@@ -63,10 +65,11 @@ fun DatePickerLayout(
         when (mode) { // todo animate change
             DatePickerMode.MONTHS -> {
                 val datesList = remember { mutableStateOf(emptyPlaceholderMonth) } // todo to const
-                LaunchedEffect(key1 = null) { datesList.value =
-                    withContext(Dispatchers.Default) {
-                        calculateDatesRange(displayDate)
-                    }
+                LaunchedEffect(key1 = null) {
+                    datesList.value =
+                        withContext(Dispatchers.Default) {
+                            calculateDatesRange(displayDate)
+                        }
                 }
 
                 DatePickerLayoutMonth(
@@ -83,8 +86,12 @@ fun DatePickerLayout(
                 )
             }
             DatePickerMode.YEARS -> {
+                val dateFromActual = dateFrom ?: LocalDate.now()
+                val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
+                val columnsNum = PickerSettings.yearColumnsNumber
+
                 DatePickerLayoutYears(
-                    years = Array(10) { 2017 + it }.toList(),
+                    years = createYearsMatrix(dateFromActual, dateToActual, columnsNum),
                     nowDate = nowDate,
                     displayYear = displayDate.year,
                     onSelect = {
@@ -101,7 +108,7 @@ private fun MonthLabel(
     displayMonth: LocalDate,
     modesEnabled: Boolean,
     mode: DatePickerMode = DatePickerMode.MONTHS,
-    onClick: (() -> Unit)
+    onClick: (() -> Unit) = {}
 ) {
     Row(modifier = Modifier.clickable(enabled = modesEnabled) { onClick() }) { // todo paddings for ripple
         Text(
@@ -156,39 +163,41 @@ private fun DatePickerLayoutMonth(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DatePickerLayoutYears(
-    years: List<Int>,
+    years: List<List<Int>>,
     displayYear: Int,
     nowDate: LocalDate,
     onSelect: (Int) -> Unit
 ) {
-    CompositionLocalProvider(LocalIndication provides rememberRipple(bounded = false)) {
-        LazyVerticalGrid(
-            cells = GridCells.Fixed(3)
-        ) {
-            items(years) { year ->
-                Surface(
-                    modifier = Modifier
-                        .padding(horizontal = 2.dp, vertical = 8.dp)
-                        .clickable { onSelect(year) },
-                    shape = RoundedCornerShape(percent = 50),
-                    color = if (displayYear == year) MaterialTheme.colors.secondary else Color.Transparent
-                ) {
-                    Row(horizontalArrangement = Arrangement.Center) {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.h6,
-                            text = year.toString(),
-                            color = when {
-                                displayYear == year -> MaterialTheme.colors.onSecondary
-                                nowDate.year == year -> MaterialTheme.colors.primary
-                                else -> MaterialTheme.colors.onSurface
+    //CompositionLocalProvider(LocalIndication provides rememberRipple(bounded = false)) {
+        LazyColumn {
+            items(years) { row ->
+                Row {
+                    row.forEach { year ->
+                        Surface(
+                            modifier = Modifier
+                                .padding(horizontal = 2.dp, vertical = 8.dp)
+                                .clickable { onSelect(year) },
+                            shape = RoundedCornerShape(percent = 50),
+                            color = if (displayYear == year) MaterialTheme.colors.secondary else Color.Transparent
+                        ) {
+                            Row(horizontalArrangement = Arrangement.Center) {
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.h6,
+                                    text = year.toString(),
+                                    color = when {
+                                        displayYear == year -> MaterialTheme.colors.onSecondary
+                                        nowDate.year == year -> MaterialTheme.colors.primary
+                                        else -> MaterialTheme.colors.onSurface
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }
         }
-    }
+    //}
 }
 
 @Composable
@@ -209,15 +218,17 @@ private fun DateItem(
     ) {
         val (shape, text) = createRefs()
 
-        if (isHighlight(isPicked, isToday)) {
-            DateShape(
-                modifier = Modifier.constrainAs(shape) {
-                    parentAll()
-                    this.height = Dimension.fillToConstraints
-                    this.width = Dimension.fillToConstraints
-                },
-                color = getHighlightColor(isPicked, isToday)
-            )
+        if (date != null) {
+            if (isHighlight(isPicked, isToday)) {
+                DateShape(
+                    modifier = Modifier.constrainAs(shape) {
+                        parentAll()
+                        this.height = Dimension.fillToConstraints
+                        this.width = Dimension.fillToConstraints
+                    },
+                    color = getHighlightColor(isPicked, isToday)
+                )
+            }
         }
 
         Text(

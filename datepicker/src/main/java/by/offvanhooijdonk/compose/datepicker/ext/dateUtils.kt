@@ -12,7 +12,7 @@ import java.util.*
 
 internal const val MAX_WEEKS = 6
 internal val DAYS_IN_WEEK = DayOfWeek.values().size
-internal val emptyPlaceholderMonth: List<LocalDate?> = Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS, init = {null}).toList()
+internal val emptyPlaceholderMonth: List<LocalDate?> = Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS, init = { null }).toList()
 
 internal fun calculateDatesRange(date: LocalDate): List<LocalDate?> { // todo break into functions for testability
     // add all days of current month
@@ -41,6 +41,27 @@ internal fun calculateDatesRange(date: LocalDate): List<LocalDate?> { // todo br
     dates.addAll(createExtraWeekRows(monthDate))
 
     return dates
+}
+
+internal fun createYearsMatrix(dateFrom: LocalDate, dateTo: LocalDate, cellsNumber: Int): List<List<Int>> {
+    val yearsMatrix = mutableListOf<List<Int>>()
+    var index = 0
+    var year = dateFrom.year
+    val toYear = dateTo.year
+    var yearsRow = mutableListOf<Int>()
+
+    while (year <= toYear) {
+        if (index % 3 == 0) {
+            if (index - 1 >= 0) {
+                yearsRow = mutableListOf()
+            }
+            yearsMatrix.add(yearsRow)
+        }
+        yearsRow.add(year++)
+        index++
+    }
+
+    return yearsMatrix
 }
 
 private fun createExtraWeekRows(monthDate: LocalDate): List<LocalDate?> {
@@ -80,4 +101,8 @@ object PickerSettings {
     internal val defaultMaxYearsForward: Int
         @Composable
         get() = integerResource(id = R.integer.max_years_forward)
+
+    internal val yearColumnsNumber: Int
+        @Composable
+        get() = integerResource(id = R.integer.years_columns_number)
 }

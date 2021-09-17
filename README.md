@@ -5,6 +5,8 @@ Based on Google's Accompanist Pager library, see https://github.com/google/accom
 
 No release at the moment, smoke tests do pass 🤞.
 
+<img src="https://github.com/offvanHooijdonk/compose-datepicker/blob/main/docs/current-month.png" width="225"/><img src="https://github.com/offvanHooijdonk/compose-datepicker/blob/main/docs/years-layout.png" width="225"/><img src="https://github.com/offvanHooijdonk/compose-datepicker/blob/main/docs/other-year-month.png" width="225"/>
+
 Note: uses  java.time API with desugaring enabled.
 
 ⚠️ 🪲 Known bugs:

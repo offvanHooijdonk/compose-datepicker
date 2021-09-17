@@ -1,5 +1,6 @@
 package by.offvanhooijdonk.compose.datepicker.pickerlayout
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,7 +28,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun DatePickerLayout(
     modifier: Modifier = Modifier,
@@ -56,43 +57,43 @@ fun DatePickerLayout(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        when (mode) { // todo animate change
-            DatePickerMode.MONTHS -> {
-                val datesList = remember { mutableStateOf(emptyPlaceholderMonth) }
-                LaunchedEffect(key1 = null) {
-                    datesList.value =
-                        withContext(Dispatchers.Default) {
-                            calculateDatesRange(displayDate)
-                        }
+        val visibilityMode = remember(mode) { mutableStateOf(mode == DatePickerMode.MONTHS)}
+        AnimatedVisibility(visible = visibilityMode.value, enter = fadeIn(), exit = fadeOut()) {
+            val datesList = remember { mutableStateOf(emptyPlaceholderMonth) }
+            LaunchedEffect(key1 = null) {
+                datesList.value =
+                    withContext(Dispatchers.Default) {
+                        calculateDatesRange(displayDate)
+                    }
+            }
+
+            DatePickerLayoutMonth(
+                datesList = datesList.value,
+                pickedDate = pickedDate.value,
+                displayMonth = displayDate,
+                nowDate = nowDate,
+                dateFrom = dateFrom,
+                dateTo = dateTo,
+                onSelect = {
+                    pickedDate.value = it
+                    onSelect(it)
                 }
+            )
+        }
 
-                DatePickerLayoutMonth(
-                    datesList = datesList.value,
-                    pickedDate = pickedDate.value,
-                    displayMonth = displayDate,
-                    nowDate = nowDate,
-                    dateFrom = dateFrom,
-                    dateTo = dateTo,
-                    onSelect = {
-                        pickedDate.value = it
-                        onSelect(it)
-                    }
-                )
-            }
-            DatePickerMode.YEARS -> {
-                val dateFromActual = dateFrom ?: LocalDate.now()
-                val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
-                val columnsNum = PickerSettings.yearColumnsNumber
+        AnimatedVisibility(visible = !visibilityMode.value, enter = fadeIn(), exit = fadeOut()) {
+            val dateFromActual = dateFrom ?: LocalDate.now()
+            val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
+            val columnsNum = PickerSettings.yearColumnsNumber
 
-                DatePickerLayoutYears(
-                    years = createYearsMatrix(dateFromActual, dateToActual, columnsNum),
-                    nowDate = nowDate,
-                    displayYear = displayDate.year,
-                    onSelect = {
-                        onYearChange(it)
-                    }
-                )
-            }
+            DatePickerLayoutYears(
+                years = createYearsMatrix(dateFromActual, dateToActual, columnsNum),
+                nowDate = nowDate,
+                displayYear = displayDate.year,
+                onSelect = {
+                    onYearChange(it)
+                }
+            )
         }
     }
 }

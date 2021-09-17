@@ -132,7 +132,7 @@ fun DatePickerPager(
                 mode.value = DatePickerMode.MONTHS
                 coroutineScope.launch {
                     val newPage = getPageWithYear(dateFrom, dateToActual, displayDate, it)
-                    pagerState.animateScrollToPage(newPage)
+                    pagerState.scrollToPage(newPage)//animateScrollToPage(newPage)
                 }
             },
             onModeToggle = {

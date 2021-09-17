@@ -14,33 +14,55 @@ internal const val MAX_WEEKS = 6
 internal val DAYS_IN_WEEK = DayOfWeek.values().size
 internal val emptyPlaceholderMonth: List<LocalDate?> by lazy { Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS, init = { null }).toList() }
 
-internal fun calculateDatesRange(date: LocalDate): List<LocalDate?> { // todo break into functions for testability
-    // add all days of current month
-    val monthDate = date.with(TemporalAdjusters.firstDayOfMonth())
+internal fun calculateDatesRange(date: LocalDate): List<LocalDate?> {
     val dates = LinkedList<LocalDate?>()
-    dates.addAll(Array(monthDate.lengthOfMonth()) { monthDate.withDayOfMonth(it + 1) })
+
+    // add all days of current month
+    dates.addAll(getMonthDates(date))
 
     // add days before 1st date to complete the week
-    val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
-    val startOfCurrentWeek = monthDate.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
-    val diffBefore = (monthDate.dayOfWeek.value - startOfCurrentWeek.dayOfWeek.value).let {
-        if (it >= 0) it else it + DAYS_IN_WEEK
-    }
-    for (i in 1..diffBefore) dates.add(0, null)
+    dates.addAll(0, getFirstWeekLeadingPlaceHolders(date))
 
     // add days after last date to complete the week
-    val lastDayOfWeek = firstDayOfWeek.minus(1)
-    val lastMonthDate = monthDate.with(TemporalAdjusters.lastDayOfMonth())
+    dates.addAll(getLastWeekTrailingPlaceHolders(date))
+
+    return dates
+}
+
+internal fun getMonthDates(monthDate: LocalDate): List<LocalDate> {
+    val monthStartDate = monthDate.with(TemporalAdjusters.firstDayOfMonth())
+    val dates = mutableListOf<LocalDate>()
+    dates.addAll(Array(monthDate.lengthOfMonth()) { monthStartDate.withDayOfMonth(it + 1) })
+
+    return dates
+}
+
+internal fun getFirstWeekLeadingPlaceHolders(monthDate: LocalDate): List<LocalDate?> {
+    val placeHolders = mutableListOf<LocalDate?>()
+    val monthStartDate = monthDate.with(TemporalAdjusters.firstDayOfMonth())
+    val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
+    val startOfCurrentWeek = monthStartDate.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
+    val diffBefore = (monthStartDate.dayOfWeek.value - startOfCurrentWeek.dayOfWeek.value).let {
+        if (it >= 0) it else it + DAYS_IN_WEEK
+    }
+    for (i in 1..diffBefore) placeHolders.add(null)
+
+    return placeHolders
+}
+
+internal fun getLastWeekTrailingPlaceHolders(monthDate: LocalDate): List<LocalDate?> {
+    val placeHolders = mutableListOf<LocalDate?>()
+
+    val monthStartDate = monthDate.with(TemporalAdjusters.firstDayOfMonth())
+    val lastDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek.minus(1)
+    val lastMonthDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth())
     val endOfWeek = lastMonthDate.with(TemporalAdjusters.nextOrSame(lastDayOfWeek))
     val diffAfter = (endOfWeek.dayOfWeek.value - lastMonthDate.dayOfWeek.value).let {
         if (it >= 0) it else it + DAYS_IN_WEEK
     }
-    for (i in 1..diffAfter) dates.add(null)
+    for (i in 1..diffAfter) placeHolders.add(null)
 
-    // add rows of dates to fill to max weeks in month possible. NOTE those dates considered FAKE
-    dates.addAll(createExtraWeekRows(monthDate))
-
-    return dates
+    return placeHolders
 }
 
 internal fun createYearsMatrix(dateFrom: LocalDate, dateTo: LocalDate, cellsNumber: Int): List<List<Int>> {

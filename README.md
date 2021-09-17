@@ -18,6 +18,7 @@ Implemented ✅ :
 Upcoming 🚀 :
 * Adding Date Picker Settings object to encapsulate different UI modes 
 * Unit & tests
-* Bug fixes, UI adjustments
+* UI adjustments
+* Time Picker, Date Input, Time Input
 
 Feel free to fork/use/pull request/whatever.

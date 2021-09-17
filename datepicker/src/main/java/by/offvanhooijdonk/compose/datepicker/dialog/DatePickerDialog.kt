@@ -30,6 +30,7 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 import java.util.*
 
 @Composable
@@ -130,7 +131,7 @@ fun DatePickerPager(
             onYearChange = {
                 mode.value = DatePickerMode.MONTHS
                 coroutineScope.launch {
-                    val newPage = getPageWithYear(dateFrom, displayDate, it)
+                    val newPage = getPageWithYear(dateFrom, dateToActual, displayDate, it)
                     pagerState.animateScrollToPage(newPage)
                 }
             },
@@ -201,8 +202,11 @@ internal fun getDefaultDateTo(dateFrom: LocalDate): LocalDate =
 internal fun getMaxPages(dateFrom: LocalDate, dateTo: LocalDate): Int =
     dateFrom.diffMonths(dateTo)
 
-internal fun getPageWithYear(dateFrom: LocalDate, displayDate: LocalDate, year: Int): Int {
-    val newDate = displayDate.withYear(year)
+internal fun getPageWithYear(dateFrom: LocalDate, dateTo: LocalDate, displayDate: LocalDate, year: Int): Int {
+    val monthTo = dateTo.with(TemporalAdjusters.firstDayOfMonth())
+    val newDate = displayDate.withYear(year).let {
+        if (it.isBefore(monthTo)) it else monthTo
+    }
     return dateFrom.diffMonths(newDate).let { if (it > 0) it else 0 }
 }
 

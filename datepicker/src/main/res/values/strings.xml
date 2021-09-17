@@ -1,11 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="day_sunday_short">S</string>
-    <string name="day_monday_short">M</string>
-    <string name="day_tuesday_short">T</string>
-    <string name="day_wednesday_short">W</string>
-    <string name="day_thursday_short">T</string>
-    <string name="day_friday_short">F</string>
-    <string name="day_saturday_short">S</string>
 </resources>

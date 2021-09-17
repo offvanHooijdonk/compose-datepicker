@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun SamplesScreen() {
-    val isDialogShow = remember { mutableStateOf(true) }
+    val isDialogShow = remember { mutableStateOf(false) }
     val datePicked = remember { mutableStateOf(LocalDate.now()) }
     val textDate = remember(datePicked.value) { mutableStateOf(datePicked.value.toDateString()) }
 

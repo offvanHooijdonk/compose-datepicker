@@ -1,19 +1,24 @@
 package by.offvanhooijdonk.compose.datepicker.dialog
 
 import android.text.format.DateFormat
-import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import by.offvanhooijdonk.compose.datepicker.ext.PickerSettings
 import by.offvanhooijdonk.compose.datepicker.ext.diffMonths
 import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerLayout
@@ -25,11 +30,12 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 import java.util.*
 
 @Composable
 fun DatePickerDialog(
-    initialPickedDate: LocalDate, // todo make optional
+    initialPickedDate: LocalDate = LocalDate.now(),
     dateFrom: LocalDate = LocalDate.now(),
     dateTo: LocalDate? = null,
     onPick: (LocalDate) -> Unit,
@@ -38,21 +44,43 @@ fun DatePickerDialog(
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(shape = RoundedCornerShape(4.dp)) {
             val pickedDate = remember { mutableStateOf(initialPickedDate) }
-            Column {// fixme fix layout to not overscroll years list
-                DatePickedHeader(dateModel = pickedDate.value)
-                Spacer(modifier = Modifier.height(16.dp))
 
-                DatePickerPager(initialPickedDate, dateFrom, dateTo,
-                    onDateSelected = {
-                        pickedDate.value = it
-                    }
-                )
+            Box(modifier = Modifier, contentAlignment = Alignment.Center) {
+                ConstraintLayout {
+                    val (header, pager, buttons) = createRefs()
+                    DatePickedHeader(
+                        modifier = Modifier.constrainAs(header) {
+                            height = Dimension.wrapContent
+                            top.linkTo(parent.top)
+                        },
+                        dateModel = pickedDate.value
+                    )
 
-                DatePickerButtonsBlock(onPositiveButtonClicked = {
-                    onPick(pickedDate.value)
-                }, onNegativeButtonClick = {
-                    onDismissRequest()
-                })
+                    DatePickerPager(
+                        modifier = Modifier.constrainAs(pager) {
+                            top.linkTo(header.bottom, margin = 16.dp)
+                            bottom.linkTo(buttons.top)
+                            height = Dimension.preferredWrapContent
+                        },
+                        initialPickedDate = initialPickedDate,
+                        dateFrom = dateFrom,
+                        dateTo = dateTo,
+                        onDateSelected = {
+                            pickedDate.value = it
+                        }
+                    )
+
+                    DatePickerButtonsBlock(
+                        modifier = Modifier.constrainAs(buttons) {
+                            bottom.linkTo(parent.bottom)
+                            height = Dimension.wrapContent
+                        },
+                        onPositiveButtonClicked = {
+                            onPick(pickedDate.value)
+                        }, onNegativeButtonClick = {
+                            onDismissRequest()
+                        })
+                }
             }
         }
     }
@@ -61,6 +89,7 @@ fun DatePickerDialog(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun DatePickerPager(
+    modifier: Modifier = Modifier,
     initialPickedDate: LocalDate,
     dateFrom: LocalDate = LocalDate.now(),
     dateTo: LocalDate? = null,
@@ -72,19 +101,24 @@ fun DatePickerPager(
     val initPage = getInitialPage(now = LocalDate.now(), dateFrom = dateFrom, pickedDate = initialPickedDate)
     val pagerState = rememberPagerState(
         pageCount = getMaxPages(dateFrom, dateToActual),
-        initialPage = initPage, initialOffscreenLimit = 3
+        initialPage = initPage
     )
     val coroutineScope = rememberCoroutineScope()
     val mode = remember { mutableStateOf(DatePickerMode.MONTHS) }
 
     HorizontalPager(
+        modifier = Modifier
+            .then(modifier)
+            .clipToBounds(),
         verticalAlignment = Alignment.Top,
         state = pagerState,
         dragEnabled = mode.value == DatePickerMode.MONTHS
     ) { page ->
         val displayDate = dateFrom.plusMonths(page.toLong())
         DatePickerLayout(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .then(modifier),
             displayDate = displayDate,
             initialPickedDate = pickedDate.value,
             dateFrom = dateFrom,
@@ -93,13 +127,12 @@ fun DatePickerPager(
             onSelect = {
                 pickedDate.value = it
                 onDateSelected(it)
-                // todo if picked date beyond displayed month - set offset to show the month (if not greater than max offset)
             },
             onYearChange = {
                 mode.value = DatePickerMode.MONTHS
                 coroutineScope.launch {
-                    val newPage = getPageWithYear(dateFrom, displayDate, it)
-                    pagerState.animateScrollToPage(newPage)
+                    val newPage = getPageWithYear(dateFrom, dateToActual, displayDate, it)
+                    pagerState.scrollToPage(newPage)//animateScrollToPage(newPage)
                 }
             },
             onModeToggle = {
@@ -110,10 +143,12 @@ fun DatePickerPager(
 }
 
 @Composable
-private fun DatePickedHeader(dateModel: LocalDate) {
+private fun DatePickedHeader(modifier: Modifier = Modifier, dateModel: LocalDate) {
     Box(
         modifier = Modifier
-            .fillMaxWidth(),
+            .then(modifier)
+            .fillMaxWidth()
+            .wrapContentHeight(),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -128,11 +163,13 @@ private fun DatePickedHeader(dateModel: LocalDate) {
 
 @Composable
 private fun DatePickerButtonsBlock(
+    modifier: Modifier = Modifier,
     onPositiveButtonClicked: () -> Unit,
     onNegativeButtonClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
+            .then(modifier)
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.End
@@ -165,8 +202,11 @@ internal fun getDefaultDateTo(dateFrom: LocalDate): LocalDate =
 internal fun getMaxPages(dateFrom: LocalDate, dateTo: LocalDate): Int =
     dateFrom.diffMonths(dateTo)
 
-internal fun getPageWithYear(dateFrom: LocalDate, displayDate: LocalDate, year: Int): Int {
-    val newDate = displayDate.withYear(year)
+internal fun getPageWithYear(dateFrom: LocalDate, dateTo: LocalDate, displayDate: LocalDate, year: Int): Int {
+    val monthTo = dateTo.with(TemporalAdjusters.firstDayOfMonth())
+    val newDate = displayDate.withYear(year).let {
+        if (it.isBefore(monthTo)) it else monthTo
+    }
     return dateFrom.diffMonths(newDate).let { if (it > 0) it else 0 }
 }
 

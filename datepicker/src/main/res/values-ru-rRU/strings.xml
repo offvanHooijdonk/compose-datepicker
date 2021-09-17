@@ -1,10 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="day_sunday_short">вс</string>
-    <string name="day_monday_short">пн</string>
-    <string name="day_tuesday_short">вт</string>
-    <string name="day_wednesday_short">ср</string>
-    <string name="day_thursday_short">чт</string>
-    <string name="day_friday_short">пт</string>
-    <string name="day_saturday_short">сб</string>
 </resources>

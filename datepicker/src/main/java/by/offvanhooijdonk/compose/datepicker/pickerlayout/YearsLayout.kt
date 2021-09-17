@@ -35,7 +35,7 @@ internal fun DatePickerLayoutYears(
     CompositionLocalProvider(LocalIndication provides rememberRipple(bounded = false)) {
         LazyColumn {
             items(years) { row ->
-                Row() {
+                Row {
                     row.forEach { year ->
                         YearItem(
                             year = year,
@@ -80,13 +80,13 @@ private fun YearItem(year: Int, isSelected: Boolean, isCurrentYear: Boolean, onC
 internal fun Preview_YearsLayout() {
     val dateNow = LocalDate.now()
     PreviewAppTheme {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+        //Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             DatePickerLayoutYears(
                 years = createYearsMatrix(dateNow, dateNow.plusYears(16), cellsNumber = 3),
                 displayYear = 2025,
                 nowDate = dateNow,
                 onSelect = {}
             )
-        }
+        //}
     }
 }

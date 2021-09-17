@@ -44,7 +44,7 @@ fun DatePickerLayout(
     val nowDate = LocalDate.now()
     val pickedDate = remember { mutableStateOf(initialPickedDate) }
 
-    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Spacer(modifier = Modifier.height(8.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             MonthLabel(
@@ -57,43 +57,48 @@ fun DatePickerLayout(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        val visibilityMode = remember(mode) { mutableStateOf(mode == DatePickerMode.MONTHS)}
-        AnimatedVisibility(visible = visibilityMode.value, enter = fadeIn(), exit = fadeOut()) {
-            val datesList = remember { mutableStateOf(emptyPlaceholderMonth) }
-            LaunchedEffect(key1 = null) {
-                datesList.value =
-                    withContext(Dispatchers.Default) {
-                        calculateDatesRange(displayDate)
+        val modeState = remember(mode) { mutableStateOf(mode) }
+        Crossfade(targetState = modeState) { currMode ->
+            when (currMode.value) {
+                DatePickerMode.MONTHS -> {
+                    val datesList = remember { mutableStateOf(emptyPlaceholderMonth) }
+                    LaunchedEffect(key1 = null) {
+                        datesList.value =
+                            withContext(Dispatchers.Default) {
+                                calculateDatesRange(displayDate)
+                            }
                     }
+
+                    DatePickerLayoutMonth(
+                        datesList = datesList.value,
+                        pickedDate = pickedDate.value,
+                        displayMonth = displayDate,
+                        nowDate = nowDate,
+                        dateFrom = dateFrom,
+                        dateTo = dateTo,
+                        onSelect = {
+                            pickedDate.value = it
+                            onSelect(it)
+                        }
+                    )
+                }
+                DatePickerMode.YEARS -> {
+                    val dateFromActual = dateFrom ?: LocalDate.now()
+                    val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
+                    val columnsNum = PickerSettings.yearColumnsNumber
+
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                        DatePickerLayoutYears(
+                            years = createYearsMatrix(dateFromActual, dateToActual, columnsNum),
+                            nowDate = nowDate,
+                            displayYear = displayDate.year,
+                            onSelect = {
+                                onYearChange(it)
+                            }
+                        )
+                    }
+                }
             }
-
-            DatePickerLayoutMonth(
-                datesList = datesList.value,
-                pickedDate = pickedDate.value,
-                displayMonth = displayDate,
-                nowDate = nowDate,
-                dateFrom = dateFrom,
-                dateTo = dateTo,
-                onSelect = {
-                    pickedDate.value = it
-                    onSelect(it)
-                }
-            )
-        }
-
-        AnimatedVisibility(visible = !visibilityMode.value, enter = fadeIn(), exit = fadeOut()) {
-            val dateFromActual = dateFrom ?: LocalDate.now()
-            val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
-            val columnsNum = PickerSettings.yearColumnsNumber
-
-            DatePickerLayoutYears(
-                years = createYearsMatrix(dateFromActual, dateToActual, columnsNum),
-                nowDate = nowDate,
-                displayYear = displayDate.year,
-                onSelect = {
-                    onYearChange(it)
-                }
-            )
         }
     }
 }
@@ -105,11 +110,15 @@ private fun MonthLabel(
     mode: DatePickerMode = DatePickerMode.MONTHS,
     onClick: (() -> Unit) = {}
 ) {
-    Row(modifier = Modifier.clickable(enabled = modesEnabled) { onClick() }) { // todo paddings for ripple
+    Row(modifier = Modifier
+        .padding(horizontal = 8.dp, vertical = 4.dp)
+        .clickable(enabled = modesEnabled) { onClick() }
+    ) {
         Text(
             text = displayMonth.format(
                 DateTimeFormatter.ofPattern("MMMM yyyy")
-            )
+            ),
+            modifier = Modifier.padding(start = 8.dp)
         ) // todo extract text format
         if (modesEnabled) {
             Spacer(modifier = Modifier.width(4.dp))

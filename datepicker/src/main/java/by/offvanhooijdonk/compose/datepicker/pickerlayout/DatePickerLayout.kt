@@ -43,7 +43,7 @@ fun DatePickerLayout(
     val nowDate = LocalDate.now()
     val pickedDate = remember { mutableStateOf(initialPickedDate) }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.height(8.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             MonthLabel(

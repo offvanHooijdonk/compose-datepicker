@@ -3,7 +3,6 @@ package by.offvanhooijdonk.compose.datepicker.dialog
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -19,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import by.offvanhooijdonk.compose.datepicker.ext.PickerSettings
 import by.offvanhooijdonk.compose.datepicker.ext.diffMonths
 import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerLayout
@@ -34,7 +34,7 @@ import java.util.*
 
 @Composable
 fun DatePickerDialog(
-    initialPickedDate: LocalDate, // todo make optional
+    initialPickedDate: LocalDate = LocalDate.now(),
     dateFrom: LocalDate = LocalDate.now(),
     dateTo: LocalDate? = null,
     onPick: (LocalDate) -> Unit,
@@ -43,38 +43,44 @@ fun DatePickerDialog(
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(shape = RoundedCornerShape(4.dp)) {
             val pickedDate = remember { mutableStateOf(initialPickedDate) }
-            //Column {// fixme fix layout to not overscroll years list
-            ConstraintLayout {
-                val (header, pager, buttons) = createRefs()
-                DatePickedHeader(
-                    modifier = Modifier.constrainAs(header) {
-                        top.linkTo(parent.top)
-                    },
-                    dateModel = pickedDate.value
-                )
 
-                DatePickerPager(
-                    modifier = Modifier.constrainAs(pager) {
-                        top.linkTo(header.bottom, margin = 16.dp)
-                        bottom.linkTo(buttons.top)
-                    },
-                    initialPickedDate, dateFrom, dateTo,
-                    onDateSelected = {
-                        pickedDate.value = it
-                    }
-                )
+            Box(modifier = Modifier, contentAlignment = Alignment.Center) {
+                ConstraintLayout {
+                    val (header, pager, buttons) = createRefs()
+                    DatePickedHeader(
+                        modifier = Modifier.constrainAs(header) {
+                            height = Dimension.wrapContent
+                            top.linkTo(parent.top)
+                        },
+                        dateModel = pickedDate.value
+                    )
 
-                DatePickerButtonsBlock(
-                    modifier = Modifier.constrainAs(buttons) {
-                        bottom.linkTo(parent.bottom)
-                    },
-                    onPositiveButtonClicked = {
-                        onPick(pickedDate.value)
-                    }, onNegativeButtonClick = {
-                        onDismissRequest()
-                    })
+                    DatePickerPager(
+                        modifier = Modifier.constrainAs(pager) {
+                            top.linkTo(header.bottom, margin = 16.dp)
+                            bottom.linkTo(buttons.top)
+                            height = Dimension.preferredWrapContent
+                        },
+                        initialPickedDate = initialPickedDate,
+                        dateFrom = dateFrom,
+                        dateTo = dateTo,
+                        onDateSelected = {
+                            pickedDate.value = it
+                        }
+                    )
+
+                    DatePickerButtonsBlock(
+                        modifier = Modifier.constrainAs(buttons) {
+                            bottom.linkTo(parent.bottom)
+                            height = Dimension.wrapContent
+                        },
+                        onPositiveButtonClicked = {
+                            onPick(pickedDate.value)
+                        }, onNegativeButtonClick = {
+                            onDismissRequest()
+                        })
+                }
             }
-            //}
         }
     }
 }
@@ -100,14 +106,18 @@ fun DatePickerPager(
     val mode = remember { mutableStateOf(DatePickerMode.MONTHS) }
 
     HorizontalPager(
-        modifier = Modifier.then(modifier).clipToBounds(),
+        modifier = Modifier
+            .then(modifier)
+            .clipToBounds(),
         verticalAlignment = Alignment.Top,
         state = pagerState,
         dragEnabled = mode.value == DatePickerMode.MONTHS
     ) { page ->
         val displayDate = dateFrom.plusMonths(page.toLong())
         DatePickerLayout(
-            modifier = Modifier.padding(horizontal = 16.dp).then(modifier),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .then(modifier),
             displayDate = displayDate,
             initialPickedDate = pickedDate.value,
             dateFrom = dateFrom,
@@ -136,7 +146,8 @@ private fun DatePickedHeader(modifier: Modifier = Modifier, dateModel: LocalDate
     Box(
         modifier = Modifier
             .then(modifier)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .wrapContentHeight(),
         contentAlignment = Alignment.Center
     ) {
         Text(

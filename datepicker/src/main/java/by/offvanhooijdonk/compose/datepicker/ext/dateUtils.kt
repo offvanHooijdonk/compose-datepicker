@@ -12,7 +12,7 @@ import java.util.*
 
 internal const val MAX_WEEKS = 6
 internal val DAYS_IN_WEEK = DayOfWeek.values().size
-internal val emptyPlaceholderMonth: List<LocalDate?> = Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS, init = { null }).toList()
+internal val emptyPlaceholderMonth: List<LocalDate?> by lazy { Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS, init = { null }).toList() }
 
 internal fun calculateDatesRange(date: LocalDate): List<LocalDate?> { // todo break into functions for testability
     // add all days of current month
@@ -51,7 +51,7 @@ internal fun createYearsMatrix(dateFrom: LocalDate, dateTo: LocalDate, cellsNumb
     var yearsRow = mutableListOf<Int>()
 
     while (year <= toYear) {
-        if (index % 3 == 0) {
+        if (index % cellsNumber == 0) {
             if (index - 1 >= 0) {
                 yearsRow = mutableListOf()
             }
@@ -80,7 +80,7 @@ private fun getWeeksNumber(date: LocalDate): Int {
     return weekEndNum - weekStartNum + 1
 }
 
-internal val weekDaysNames: List<String> by lazy { getWeekDaysShortNames() } // todo use LocalProvider
+internal val weekDaysNames: List<String> by lazy { getWeekDaysShortNames() }
 internal fun getWeekDaysShortNames(): List<String> {
     val days = mutableListOf<String>()
     val locale = Locale.getDefault()

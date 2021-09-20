@@ -3,14 +3,8 @@ package by.offvanhooijdonk.compose.datepicker.sample
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +33,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun SamplesScreen() {
+    val isHeaderColorPrimary = remember { mutableStateOf(false) }
     val isDialogShow = remember { mutableStateOf(false) }
     val datePicked = remember { mutableStateOf(LocalDate.now()) }
     val textDate = remember(datePicked.value) { mutableStateOf(datePicked.value.toDateString()) }
@@ -51,7 +46,9 @@ fun SamplesScreen() {
                 datePicked.value = date
                 isDialogShow.value = false
             },
-            settings = DatePickerSettings(yearColumnsNumber = 3, headerStyle = DatePickerSettings.HeaderStyle.COLOR_SURFACE),
+            settings = DatePickerSettings.builder().apply {
+                if (isHeaderColorPrimary.value) headerColorPrimary() else headerColorSurface()
+            }.build(),
             onDismissRequest = {
                 isDialogShow.value = false
             }
@@ -63,6 +60,14 @@ fun SamplesScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row {
+            Text(text = "Header color primary")
+            Spacer(modifier = Modifier.width(16.dp))
+            Switch(checked = isHeaderColorPrimary.value, onCheckedChange = {
+                isHeaderColorPrimary.value = !isHeaderColorPrimary.value
+            })
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         TextButton(onClick = { isDialogShow.value = true }) {
             Text(text = "Pick Date")
         }

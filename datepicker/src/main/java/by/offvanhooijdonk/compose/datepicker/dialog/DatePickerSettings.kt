@@ -11,6 +11,29 @@ data class DatePickerSettings(
     val yearColumnsNumber: Int = 0,
     val headerStyle: HeaderStyle = HeaderStyle.COLOR_SURFACE,
 ) {
+    companion object {
+        fun builder() = Builder()
+    }
+
+    class Builder {
+        private val default = DatePickerSettings()
+        private var yearsPickEnabled: Boolean = default.yearsPickEnabled
+        private var yearColumnsNumber: Int = default.yearColumnsNumber
+        private var headerStyle: HeaderStyle = default.headerStyle
+
+        fun build() = DatePickerSettings(
+            yearsPickEnabled = yearsPickEnabled,
+            yearColumnsNumber = yearColumnsNumber,
+            headerStyle = headerStyle,
+        )
+
+        fun headerColorPrimary() { headerStyle = HeaderStyle.COLOR_PRIMARY }
+        fun headerColorSurface() { headerStyle = HeaderStyle.COLOR_SURFACE }
+        fun yearColumns(number: Int) { yearColumnsNumber = number }
+        fun yearPickEnabled() { yearsPickEnabled = true }
+        fun yearPickDisabled() { yearsPickEnabled = false }
+        fun yearPick(isEnabled: Boolean) { yearsPickEnabled = isEnabled }
+    }
 
     enum class HeaderStyle {
         COLOR_PRIMARY, COLOR_SURFACE

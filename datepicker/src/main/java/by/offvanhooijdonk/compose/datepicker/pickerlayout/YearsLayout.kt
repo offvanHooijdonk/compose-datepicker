@@ -13,13 +13,13 @@ import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import by.offvanhooijdonk.compose.datepicker.ext.PickerDefaults
 import by.offvanhooijdonk.compose.datepicker.ext.createYearsMatrix
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import java.time.LocalDate
@@ -30,6 +30,7 @@ internal fun DatePickerLayoutYears(
     years: List<List<Int>>,
     displayYear: Int,
     nowDate: LocalDate,
+    yearsColumnsNumber: Int,
     onSelect: (Int) -> Unit
 ) {
     CompositionLocalProvider(LocalIndication provides rememberRipple(bounded = false)) {
@@ -79,12 +80,14 @@ private fun YearItem(year: Int, isSelected: Boolean, isCurrentYear: Boolean, onC
 @Composable
 internal fun Preview_YearsLayout() {
     val dateNow = LocalDate.now()
+    val colsNum = 3
     PreviewAppTheme {
         //Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
             DatePickerLayoutYears(
-                years = createYearsMatrix(dateNow, dateNow.plusYears(16), cellsNumber = 3),
+                years = createYearsMatrix(dateNow, dateNow.plusYears(16), cellsNumber = colsNum),
                 displayYear = 2025,
                 nowDate = dateNow,
+                yearsColumnsNumber = colsNum,
                 onSelect = {}
             )
         //}

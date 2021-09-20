@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.offvanhooijdonk.compose.datepicker.dialog.DatePickerDialog
+import by.offvanhooijdonk.compose.datepicker.dialog.DatePickerSettings
 import by.offvanhooijdonk.compose.datepicker.sample.ext.toDateString
 import by.offvanhooijdonk.compose.datepicker.sample.ui.theme.ComposeDatePickerTheme
 import java.time.LocalDate
@@ -47,10 +48,10 @@ fun SamplesScreen() {
             initialPickedDate = datePicked.value,
             dateTo = null,
             onPick = { date ->
-                //textDate.value = "$day $month $year"
                 datePicked.value = date
                 isDialogShow.value = false
             },
+            settings = DatePickerSettings(yearColumnsNumber = 3, headerStyle = DatePickerSettings.HeaderStyle.COLOR_SURFACE),
             onDismissRequest = {
                 isDialogShow.value = false
             }

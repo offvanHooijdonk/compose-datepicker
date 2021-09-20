@@ -10,6 +10,7 @@ import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
 import java.util.*
 
+// TODO Move functions to packages they are used in where possible, so the lib could be easy split into several if needed
 internal const val MAX_WEEKS = 6
 internal val DAYS_IN_WEEK = DayOfWeek.values().size
 internal val emptyPlaceholderMonth: List<LocalDate?> by lazy { Array<LocalDate?>(DAYS_IN_WEEK * MAX_WEEKS, init = { null }).toList() }
@@ -119,12 +120,12 @@ internal fun isDateInRange(date: LocalDate, dateFrom: LocalDate?, dateTo: LocalD
             && dateTo?.plusDays(1)?.isAfter(date) ?: true
 
 
-object PickerSettings {
-    internal val defaultMaxYearsForward: Int
+internal object PickerDefaults {
+    internal val maxYearsForward: Int
         @Composable
         get() = integerResource(id = R.integer.max_years_forward)
 
     internal val yearColumnsNumber: Int
         @Composable
-        get() = integerResource(id = R.integer.years_columns_number)
+        get() = integerResource(id = R.integer.dtpk_default_years_columns_number)
 }

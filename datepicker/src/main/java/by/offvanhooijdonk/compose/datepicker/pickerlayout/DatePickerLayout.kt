@@ -1,6 +1,7 @@
 package by.offvanhooijdonk.compose.datepicker.pickerlayout
 
-import androidx.compose.animation.*
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,8 +18,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.offvanhooijdonk.compose.datepicker.R
+import by.offvanhooijdonk.compose.datepicker.dialog.DatePickerSettings
 import by.offvanhooijdonk.compose.datepicker.dialog.getDefaultDateTo
-import by.offvanhooijdonk.compose.datepicker.ext.PickerSettings
+import by.offvanhooijdonk.compose.datepicker.ext.PickerDefaults
 import by.offvanhooijdonk.compose.datepicker.ext.calculateDatesRange
 import by.offvanhooijdonk.compose.datepicker.ext.createYearsMatrix
 import by.offvanhooijdonk.compose.datepicker.ext.emptyPlaceholderMonth
@@ -37,6 +39,7 @@ fun DatePickerLayout(
     dateFrom: LocalDate? = null,
     dateTo: LocalDate? = null,
     mode: DatePickerMode = DatePickerMode.MONTHS,
+    settings: DatePickerSettings = DatePickerSettings(),
     onSelect: (LocalDate) -> Unit,
     onYearChange: (Int) -> Unit = {},
     onModeToggle: () -> Unit = {}
@@ -49,7 +52,7 @@ fun DatePickerLayout(
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             MonthLabel(
                 displayMonth = displayDate,
-                modesEnabled = true,
+                modesEnabled = settings.yearsPickEnabled,
                 mode = mode
             ) { // todo change [modesEnabled] to settings when implemented
                 onModeToggle()
@@ -58,9 +61,28 @@ fun DatePickerLayout(
         Spacer(modifier = Modifier.height(16.dp))
 
         val modeState = remember(mode) { mutableStateOf(mode) }
-        Crossfade(targetState = modeState) { currMode ->
-            when (currMode.value) {
-                DatePickerMode.MONTHS -> {
+        Crossfade(targetState = modeState) { currentMode ->
+            when {
+                settings.yearsPickEnabled && currentMode.value == DatePickerMode.YEARS -> {
+                    val dateFromActual = dateFrom ?: LocalDate.now()
+                    val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
+                    val columnsNumber = settings.yearColumnsNumber.let {
+                        if (it >= 0) it else PickerDefaults.yearColumnsNumber
+                    }
+
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                        DatePickerLayoutYears(
+                            years = createYearsMatrix(dateFromActual, dateToActual, columnsNumber),
+                            nowDate = nowDate,
+                            displayYear = displayDate.year,
+                            yearsColumnsNumber = columnsNumber,
+                            onSelect = {
+                                onYearChange(it)
+                            }
+                        )
+                    }
+                }
+                else -> {
                     val datesList = remember { mutableStateOf(emptyPlaceholderMonth) }
                     LaunchedEffect(key1 = null) {
                         datesList.value =
@@ -81,22 +103,6 @@ fun DatePickerLayout(
                             onSelect(it)
                         }
                     )
-                }
-                DatePickerMode.YEARS -> {
-                    val dateFromActual = dateFrom ?: LocalDate.now()
-                    val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
-                    val columnsNum = PickerSettings.yearColumnsNumber
-
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                        DatePickerLayoutYears(
-                            years = createYearsMatrix(dateFromActual, dateToActual, columnsNum),
-                            nowDate = nowDate,
-                            displayYear = displayDate.year,
-                            onSelect = {
-                                onYearChange(it)
-                            }
-                        )
-                    }
                 }
             }
         }

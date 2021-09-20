@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="max_years_forward">10</integer>
-    <integer name="years_columns_number">3</integer>
+    <integer name="dtpk_default_years_columns_number">3</integer>
 </resources>

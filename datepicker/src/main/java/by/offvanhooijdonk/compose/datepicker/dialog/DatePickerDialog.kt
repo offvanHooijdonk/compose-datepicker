@@ -1,6 +1,7 @@
 package by.offvanhooijdonk.compose.datepicker.dialog
 
 import android.text.format.DateFormat
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -19,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import by.offvanhooijdonk.compose.datepicker.ext.PickerSettings
+import by.offvanhooijdonk.compose.datepicker.ext.PickerDefaults
 import by.offvanhooijdonk.compose.datepicker.ext.diffMonths
 import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerLayout
 import by.offvanhooijdonk.compose.datepicker.pickerlayout.DatePickerMode
@@ -33,13 +34,23 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.*
 
+/**
+ * Renders a dialog to pick a single date.
+ * @param initialPickedDate The date to be marked as currently selected. Default is today.
+ * @param dateFrom The first date allowed to be selected. All previous dates are marked greyed and cannot be picked. Default is today.
+ * @param dateTo The date starting with user cannot pick a date. Next month and next year are not presented in the picker.
+ * @param settings Customization of the picker layout and behavior, see [DatePickerSettings].
+ * @param onDismissRequest Called when negative button is clicked.
+ * @param onPick Called when positive button is clicked. Gets picked date as parameter.
+ */
 @Composable
 fun DatePickerDialog(
     initialPickedDate: LocalDate = LocalDate.now(),
     dateFrom: LocalDate = LocalDate.now(),
     dateTo: LocalDate? = null,
+    settings: DatePickerSettings = DatePickerSettings(),
+    onDismissRequest: () -> Unit,
     onPick: (LocalDate) -> Unit,
-    onDismissRequest: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(shape = RoundedCornerShape(4.dp)) {
@@ -53,18 +64,20 @@ fun DatePickerDialog(
                             height = Dimension.wrapContent
                             top.linkTo(parent.top)
                         },
-                        dateModel = pickedDate.value
+                        dateModel = pickedDate.value,
+                        style = settings.headerStyle
                     )
 
                     DatePickerPager(
                         modifier = Modifier.constrainAs(pager) {
-                            top.linkTo(header.bottom, margin = 16.dp)
+                            top.linkTo(header.bottom, margin = 8.dp)
                             bottom.linkTo(buttons.top)
                             height = Dimension.preferredWrapContent
                         },
                         initialPickedDate = initialPickedDate,
                         dateFrom = dateFrom,
                         dateTo = dateTo,
+                        settings = settings,
                         onDateSelected = {
                             pickedDate.value = it
                         }
@@ -75,7 +88,7 @@ fun DatePickerDialog(
                             bottom.linkTo(parent.bottom)
                             height = Dimension.wrapContent
                         },
-                        onPositiveButtonClicked = {
+                        onPositiveButtonClick = {
                             onPick(pickedDate.value)
                         }, onNegativeButtonClick = {
                             onDismissRequest()
@@ -93,6 +106,7 @@ fun DatePickerPager(
     initialPickedDate: LocalDate,
     dateFrom: LocalDate = LocalDate.now(),
     dateTo: LocalDate? = null,
+    settings: DatePickerSettings = DatePickerSettings(),
     onDateSelected: (LocalDate) -> Unit,
 ) {
     val pickedDate = remember { mutableStateOf(initialPickedDate) }
@@ -123,6 +137,7 @@ fun DatePickerPager(
             initialPickedDate = pickedDate.value,
             dateFrom = dateFrom,
             mode = mode.value,
+            settings = settings,
             dateTo = dateToActual,
             onSelect = {
                 pickedDate.value = it
@@ -143,20 +158,26 @@ fun DatePickerPager(
 }
 
 @Composable
-private fun DatePickedHeader(modifier: Modifier = Modifier, dateModel: LocalDate) {
+private fun DatePickedHeader(
+    modifier: Modifier = Modifier,
+    dateModel: LocalDate,
+    style: DatePickerSettings.HeaderStyle
+) {
     Box(
         modifier = Modifier
             .then(modifier)
             .fillMaxWidth()
-            .wrapContentHeight(),
+            .wrapContentHeight()
+            .background(getHeaderBackgroundColor(style)),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            modifier = Modifier.padding(12.dp),
+        Text( // todo try adjust paddings for different [style] for better design
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 16.dp),
             text = dateModel.format(
                 DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(Locale.getDefault(), "EEMMMddyyyy"))
             ), // todo extract format
-            style = MaterialTheme.typography.h5
+            style = MaterialTheme.typography.h5,
+            color = getHeaderTextColor(style)
         )
     }
 }
@@ -164,7 +185,7 @@ private fun DatePickedHeader(modifier: Modifier = Modifier, dateModel: LocalDate
 @Composable
 private fun DatePickerButtonsBlock(
     modifier: Modifier = Modifier,
-    onPositiveButtonClicked: () -> Unit,
+    onPositiveButtonClick: () -> Unit,
     onNegativeButtonClick: () -> Unit
 ) {
     Row(
@@ -178,7 +199,7 @@ private fun DatePickerButtonsBlock(
             Text(text = "Cancel")
         }
         Spacer(modifier = Modifier.width(8.dp))
-        TextButton(onClick = onPositiveButtonClicked) {
+        TextButton(onClick = onPositiveButtonClick) {
             Text(text = "OK")
         }
     }
@@ -196,9 +217,9 @@ internal fun getInitialPage(now: LocalDate, dateFrom: LocalDate, pickedDate: Loc
 
 @Composable
 internal fun getDefaultDateTo(dateFrom: LocalDate): LocalDate =
-    dateFrom.plusYears(PickerSettings.defaultMaxYearsForward.toLong())
+    dateFrom.plusYears(PickerDefaults.maxYearsForward.toLong())
 
-
+private const val PAGER_START_INDEX = 0
 internal fun getMaxPages(dateFrom: LocalDate, dateTo: LocalDate): Int =
     dateFrom.diffMonths(dateTo)
 
@@ -210,7 +231,19 @@ internal fun getPageWithYear(dateFrom: LocalDate, dateTo: LocalDate, displayDate
     return dateFrom.diffMonths(newDate).let { if (it > 0) it else 0 }
 }
 
-private const val PAGER_START_INDEX = 0
+@Composable
+private fun getHeaderBackgroundColor(style: DatePickerSettings.HeaderStyle) =
+    when(style) {
+        DatePickerSettings.HeaderStyle.COLOR_PRIMARY -> MaterialTheme.colors.primary
+        DatePickerSettings.HeaderStyle.COLOR_SURFACE -> MaterialTheme.colors.surface
+    }
+
+@Composable
+private fun getHeaderTextColor(style: DatePickerSettings.HeaderStyle) =
+    when(style) {
+        DatePickerSettings.HeaderStyle.COLOR_PRIMARY -> MaterialTheme.colors.onPrimary
+        DatePickerSettings.HeaderStyle.COLOR_SURFACE -> MaterialTheme.colors.onSurface
+    }
 
 @Preview(showSystemUi = true)
 @Composable

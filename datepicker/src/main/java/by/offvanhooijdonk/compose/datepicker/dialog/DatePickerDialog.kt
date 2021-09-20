@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.*
 
-/**
+/** @author Yahor Fralou (aka offvanhooijdonk, originally Egor Frolov)
  * Renders a dialog to pick a single date.
  * @param initialPickedDate The date to be marked as currently selected. Default is today.
  * @param dateFrom The first date allowed to be selected. All previous dates are marked greyed and cannot be picked. Default is today.

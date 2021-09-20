@@ -22,9 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import by.offvanhooijdonk.compose.datepicker.ext.*
-import by.offvanhooijdonk.compose.datepicker.ext.DAYS_IN_WEEK
-import by.offvanhooijdonk.compose.datepicker.ext.isDateInRange
-import by.offvanhooijdonk.compose.datepicker.ext.weekDaysNames
 import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)

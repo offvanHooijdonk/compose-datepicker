@@ -18,9 +18,10 @@ Implemented ✅ :
 * Current MaterialTheme applies.
 
 Upcoming 🚀 :
-* Adding Date Picker Settings object to encapsulate different UI modes 
 * Unit & tests
 * UI adjustments
-* Time Picker, Date Input, Time Input
+* Time Picker, Date Range picker, Date Input, Time Input
 
 Feel free to fork/use/pull request/whatever.
+
+Bug Reports are appreciated, Feature Requests are welcomed 🤝

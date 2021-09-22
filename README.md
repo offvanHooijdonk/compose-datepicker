@@ -4,7 +4,7 @@ Started a library to implement DatePicker widget in Jetpack Compose for Android.
 Based on Google's Accompanist Pager library, see https://github.com/google/accompanist
 
 Latest version:
-```implementation 'io.github.offvanhooijdonk:compose-date-picker:0.1.0-alpha1'```
+```implementation 'io.github.offvanhooijdonk:compose-date-picker:0.1.0-alpha2'```
 
 <img src="https://github.com/offvanHooijdonk/compose-datepicker/blob/main/docs/current-month.png" width="225"/><img src="https://github.com/offvanHooijdonk/compose-datepicker/blob/main/docs/years-layout.png" width="225"/><img src="https://github.com/offvanHooijdonk/compose-datepicker/blob/main/docs/other-year-month.png" width="225"/>
 

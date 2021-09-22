@@ -5,9 +5,8 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -67,7 +66,7 @@ fun DatePickerLayout(
                     val dateFromActual = dateFrom ?: LocalDate.now()
                     val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
                     val columnsNumber = settings.yearColumnsNumber.let {
-                        if (it >= 0) it else PickerDefaults.yearColumnsNumber
+                        if (it > 0) it else PickerDefaults.yearColumnsNumber
                     }
 
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
@@ -109,6 +108,7 @@ fun DatePickerLayout(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun MonthLabel(
     displayMonth: LocalDate,
@@ -116,22 +116,25 @@ private fun MonthLabel(
     mode: DatePickerMode = DatePickerMode.MONTHS,
     onClick: (() -> Unit) = {}
 ) {
-    Row(modifier = Modifier
-        .padding(horizontal = 8.dp, vertical = 4.dp)
-        .clickable(enabled = modesEnabled) { onClick() }
-    ) {
-        Text(
-            text = displayMonth.format(
-                DateTimeFormatter.ofPattern("MMMM yyyy")
-            ),
-            modifier = Modifier.padding(start = 8.dp)
-        ) // todo extract text format
-        if (modesEnabled) {
-            Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                painter = painterResource(id = if (mode == DatePickerMode.MONTHS) R.drawable.ic_arrow_drop_down_24 else R.drawable.ic_arrow_drop_up_24),
-                tint = MaterialTheme.colors.onSurface, contentDescription = ""
-            )
+    Surface(shape = RoundedCornerShape(6.dp), onClick = onClick
+        /*modifier = Modifier.clickable(enabled = modesEnabled) { onClick() }*/) {
+        Row(modifier = Modifier
+            .padding(horizontal = 4.dp, vertical = 4.dp)
+            /*.clickable(enabled = modesEnabled) { onClick() }*/
+        ) {
+            Text(
+                text = displayMonth.format(
+                    DateTimeFormatter.ofPattern("MMMM yyyy")
+                ),
+                modifier = Modifier.padding(start = 8.dp)
+            ) // todo extract text format
+            if (modesEnabled) {
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    painter = painterResource(id = if (mode == DatePickerMode.MONTHS) R.drawable.ic_arrow_drop_down_24 else R.drawable.ic_arrow_drop_up_24),
+                    tint = MaterialTheme.colors.onSurface, contentDescription = ""
+                )
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ Latest version:
 Note: uses  java.time API with desugaring enabled.
 
 ⚠️ 🪲 Known bugs:
-* When scrolling to next month, picking new date, scrolling to previous month - previous date mark persists. This is due to Pager library implementation, which is expected to be fixed shortly in Accompanist Pager library - see Bug Report at https://github.com/google/accompanist/issues/706
+* When scrolling to next month, picking new date, scrolling to previous month - previous date mark persists, [see issue](https://github.com/offvanHooijdonk/compose-datepicker/issues/9). This is due to Pager library implementation, which is expected to be fixed shortly in Accompanist Pager library - see Bug Report at https://github.com/google/accompanist/issues/706
 
 Implemented ✅ :
 * Provides: Picker Dialog, Picker Pager, Layout Picker Layout.

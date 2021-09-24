@@ -14,12 +14,12 @@ Note: uses  java.time API with desugaring enabled.
 * When scrolling to next month, picking new date, scrolling to previous month - previous date mark persists, [see issue](https://github.com/offvanHooijdonk/compose-datepicker/issues/9). This is due to Pager library implementation, which is expected to be fixed shortly in Accompanist Pager library - see Bug Report at https://github.com/google/accompanist/issues/706
 
 Implemented ✅ :
-* Provides: Picker Dialog, Picker Pager, Layout Picker Layout.
+* Provides: Picker Dialog, Picker Pager, Picker Layout.
 * Set dateTo, dateFrom - both optional - and receive picked date.
 * Current MaterialTheme applies.
 
 Upcoming 🚀 :
-* Unit & tests
+* Unit & UI tests
 * UI adjustments
 * Time Picker, Date Range picker, Date Input, Time Input
 

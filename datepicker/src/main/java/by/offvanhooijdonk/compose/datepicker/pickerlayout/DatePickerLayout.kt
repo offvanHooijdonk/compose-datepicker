@@ -3,7 +3,6 @@ package by.offvanhooijdonk.compose.datepicker.pickerlayout
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -74,7 +73,6 @@ fun DatePickerLayout(
                             years = createYearsMatrix(dateFromActual, dateToActual, columnsNumber),
                             nowDate = nowDate,
                             displayYear = displayDate.year,
-                            yearsColumnsNumber = columnsNumber,
                             onSelect = {
                                 onYearChange(it)
                             }

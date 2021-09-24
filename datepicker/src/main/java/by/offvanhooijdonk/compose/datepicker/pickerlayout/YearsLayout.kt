@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import by.offvanhooijdonk.compose.datepicker.ext.PickerDefaults
 import by.offvanhooijdonk.compose.datepicker.ext.createYearsMatrix
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import java.time.LocalDate
@@ -30,7 +29,6 @@ internal fun DatePickerLayoutYears(
     years: List<List<Int>>,
     displayYear: Int,
     nowDate: LocalDate,
-    yearsColumnsNumber: Int,
     onSelect: (Int) -> Unit
 ) {
     CompositionLocalProvider(LocalIndication provides rememberRipple(bounded = false)) {
@@ -87,7 +85,6 @@ internal fun Preview_YearsLayout() {
                 years = createYearsMatrix(dateNow, dateNow.plusYears(16), cellsNumber = colsNum),
                 displayYear = 2025,
                 nowDate = dateNow,
-                yearsColumnsNumber = colsNum,
                 onSelect = {}
             )
         //}

@@ -114,11 +114,18 @@ private fun MonthLabel(
     mode: DatePickerMode = DatePickerMode.MONTHS,
     onClick: (() -> Unit) = {}
 ) {
-    Surface(shape = RoundedCornerShape(6.dp), onClick = onClick
-        /*modifier = Modifier.clickable(enabled = modesEnabled) { onClick() }*/) {
+    @Composable
+    fun SurfaceForLabel(modesEnabled: Boolean, content: @Composable ()-> Unit) {
+        if (modesEnabled) {
+            Surface(shape = RoundedCornerShape(6.dp), onClick = onClick) { content() }
+        } else {
+            content()
+        }
+    }
+
+    SurfaceForLabel(modesEnabled = modesEnabled) {
         Row(modifier = Modifier
             .padding(horizontal = 4.dp, vertical = 4.dp)
-            /*.clickable(enabled = modesEnabled) { onClick() }*/
         ) {
             Text(
                 text = displayMonth.format(

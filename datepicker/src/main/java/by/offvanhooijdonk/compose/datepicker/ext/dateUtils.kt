@@ -23,9 +23,9 @@ internal fun calculateDatesRange(date: LocalDate): List<LocalDate?> {
 
     // add days before 1st date to complete the week
     dates.addAll(0, getFirstWeekLeadingPlaceHolders(date))
-
-    // add days after last date to complete the week
-    dates.addAll(getLastWeekTrailingPlaceHolders(date))
+    // 9/24/2021 - !NOTE: We do NOT add ending days for the week or extra week to fit to maximum weeks (which is 6)
+    // because initially date range is stubbed with an array of 7 * 6 length, and therefore layout is measured respectfully already.
+    // If this situation changes and layout breaks, the logic of adding extra days/weeks can be found in older commits
 
     return dates
 }
@@ -51,21 +51,6 @@ internal fun getFirstWeekLeadingPlaceHolders(monthDate: LocalDate): List<LocalDa
     return placeHolders
 }
 
-internal fun getLastWeekTrailingPlaceHolders(monthDate: LocalDate): List<LocalDate?> {
-    val placeHolders = mutableListOf<LocalDate?>()
-
-    val monthStartDate = monthDate.with(TemporalAdjusters.firstDayOfMonth())
-    val lastDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek.minus(1)
-    val lastMonthDate = monthStartDate.with(TemporalAdjusters.lastDayOfMonth())
-    val endOfWeek = lastMonthDate.with(TemporalAdjusters.nextOrSame(lastDayOfWeek))
-    val diffAfter = (endOfWeek.dayOfWeek.value - lastMonthDate.dayOfWeek.value).let {
-        if (it >= 0) it else it + DAYS_IN_WEEK
-    }
-    for (i in 1..diffAfter) placeHolders.add(null)
-
-    return placeHolders
-}
-
 internal fun createYearsMatrix(dateFrom: LocalDate, dateTo: LocalDate, cellsNumber: Int): List<List<Int>> {
     val yearsMatrix = mutableListOf<List<Int>>()
     var index = 0
@@ -85,22 +70,6 @@ internal fun createYearsMatrix(dateFrom: LocalDate, dateTo: LocalDate, cellsNumb
     }
 
     return yearsMatrix
-}
-
-private fun createExtraWeekRows(monthDate: LocalDate): List<LocalDate?> {
-    val extraWeeksNum = MAX_WEEKS - getWeeksNumber(monthDate)
-    return if (extraWeeksNum > 0) {
-        Array<LocalDate?>(extraWeeksNum * DAYS_IN_WEEK) { null }.toList()
-    } else {
-        emptyList()
-    }
-}
-
-private fun getWeeksNumber(date: LocalDate): Int {
-    val fieldWeekOfYear = WeekFields.of(Locale.getDefault()).weekOfYear()
-    val weekStartNum = date.with(TemporalAdjusters.firstDayOfMonth()).get(fieldWeekOfYear)
-    val weekEndNum = date.with(TemporalAdjusters.lastDayOfMonth()).get(fieldWeekOfYear)
-    return weekEndNum - weekStartNum + 1
 }
 
 internal val weekDaysNames: List<String> by lazy { getWeekDaysShortNames() }

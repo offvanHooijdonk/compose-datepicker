@@ -3,7 +3,6 @@ package by.offvanhooijdonk.compose.datepicker.pickerlayout
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -74,7 +73,6 @@ fun DatePickerLayout(
                             years = createYearsMatrix(dateFromActual, dateToActual, columnsNumber),
                             nowDate = nowDate,
                             displayYear = displayDate.year,
-                            yearsColumnsNumber = columnsNumber,
                             onSelect = {
                                 onYearChange(it)
                             }
@@ -116,11 +114,18 @@ private fun MonthLabel(
     mode: DatePickerMode = DatePickerMode.MONTHS,
     onClick: (() -> Unit) = {}
 ) {
-    Surface(shape = RoundedCornerShape(6.dp), onClick = onClick
-        /*modifier = Modifier.clickable(enabled = modesEnabled) { onClick() }*/) {
+    @Composable
+    fun SurfaceForLabel(modesEnabled: Boolean, content: @Composable ()-> Unit) {
+        if (modesEnabled) {
+            Surface(shape = RoundedCornerShape(6.dp), onClick = onClick) { content() }
+        } else {
+            content()
+        }
+    }
+
+    SurfaceForLabel(modesEnabled = modesEnabled) {
         Row(modifier = Modifier
             .padding(horizontal = 4.dp, vertical = 4.dp)
-            /*.clickable(enabled = modesEnabled) { onClick() }*/
         ) {
             Text(
                 text = displayMonth.format(

@@ -46,7 +46,7 @@ fun SamplesScreen() {
                 datePicked.value = date
                 isDialogShow.value = false
             },
-            settings = DatePickerSettings.builder().apply {
+            settings = DatePickerSettings.builder().run {
                 if (isHeaderColorPrimary.value) headerColorPrimary() else headerColorSurface()
             }.build(),
             onDismissRequest = {

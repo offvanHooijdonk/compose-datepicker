@@ -27,12 +27,12 @@ data class DatePickerSettings(
             headerStyle = headerStyle,
         )
 
-        fun headerColorPrimary() { headerStyle = HeaderStyle.COLOR_PRIMARY }
-        fun headerColorSurface() { headerStyle = HeaderStyle.COLOR_SURFACE }
-        fun yearColumns(number: Int) { yearColumnsNumber = number }
-        fun yearPickEnabled() { yearsPickEnabled = true }
-        fun yearPickDisabled() { yearsPickEnabled = false }
-        fun yearPick(isEnabled: Boolean) { yearsPickEnabled = isEnabled }
+        fun headerColorPrimary() = this.apply { headerStyle = HeaderStyle.COLOR_PRIMARY }
+        fun headerColorSurface() = this.apply { headerStyle = HeaderStyle.COLOR_SURFACE }
+        fun yearColumns(number: Int) = this.apply { yearColumnsNumber = number }
+        fun yearPickEnabled() = this.apply { yearsPickEnabled = true }
+        fun yearPickDisabled() = this.apply { yearsPickEnabled = false }
+        fun yearPick(isEnabled: Boolean) = this.apply { yearsPickEnabled = isEnabled }
     }
 
     enum class HeaderStyle {

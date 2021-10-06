@@ -1,6 +1,5 @@
 package by.offvanhooijdonk.compose.datepicker.pickerlayout
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -17,10 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import by.offvanhooijdonk.compose.datepicker.R
 import by.offvanhooijdonk.compose.datepicker.dialog.DatePickerSettings
-import by.offvanhooijdonk.compose.datepicker.dialog.getDefaultDateTo
-import by.offvanhooijdonk.compose.datepicker.ext.PickerDefaults
 import by.offvanhooijdonk.compose.datepicker.ext.calculateDatesRange
-import by.offvanhooijdonk.compose.datepicker.ext.createYearsMatrix
 import by.offvanhooijdonk.compose.datepicker.ext.emptyPlaceholderMonth
 import by.offvanhooijdonk.compose.datepicker.theme.PreviewAppTheme
 import kotlinx.coroutines.Dispatchers
@@ -36,11 +32,11 @@ fun DatePickerLayout(
     initialPickedDate: LocalDate,
     dateFrom: LocalDate? = null,
     dateTo: LocalDate? = null,
-    mode: DatePickerMode = DatePickerMode.MONTHS,
+    //mode: DatePickerMode = DatePickerMode.MONTHS,
     settings: DatePickerSettings = DatePickerSettings(),
     onSelect: (LocalDate) -> Unit,
-    onYearChange: (Int) -> Unit = {},
-    onModeToggle: () -> Unit = {}
+    //onYearChange: (Int) -> Unit = {},
+    onHeaderClick: () -> Unit = {}
 ) {
     val nowDate = LocalDate.now()
     val pickedDate = remember { mutableStateOf(initialPickedDate) }
@@ -51,16 +47,16 @@ fun DatePickerLayout(
             MonthLabel(
                 displayMonth = displayDate,
                 modesEnabled = settings.yearsPickEnabled,
-                mode = mode
+                //mode = mode
             ) { // todo change [modesEnabled] to settings when implemented
-                onModeToggle()
+                onHeaderClick()
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        val modeState = remember(mode) { mutableStateOf(mode) }
-        Crossfade(targetState = modeState) { currentMode ->
-            when {
+        //val modeState = remember(mode) { mutableStateOf(mode) }
+        //Crossfade(targetState = modeState) { currentMode ->
+            /*when {
                 settings.yearsPickEnabled && currentMode.value == DatePickerMode.YEARS -> {
                     val dateFromActual = dateFrom ?: LocalDate.now()
                     val dateToActual = dateTo ?: getDefaultDateTo(dateFromActual)
@@ -69,7 +65,7 @@ fun DatePickerLayout(
                     }
 
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                        DatePickerLayoutYears(
+                        YearPickerLayout(
                             years = createYearsMatrix(dateFromActual, dateToActual, columnsNumber),
                             nowDate = nowDate,
                             displayYear = displayDate.year,
@@ -79,7 +75,7 @@ fun DatePickerLayout(
                         )
                     }
                 }
-                else -> {
+                else -> {*/
                     val datesList = remember { mutableStateOf(emptyPlaceholderMonth) }
                     LaunchedEffect(key1 = null) {
                         datesList.value =
@@ -100,9 +96,9 @@ fun DatePickerLayout(
                             onSelect(it)
                         }
                     )
-                }
+                /*}
             }
-        }
+        }*/
     }
 }
 
@@ -111,11 +107,11 @@ fun DatePickerLayout(
 private fun MonthLabel(
     displayMonth: LocalDate,
     modesEnabled: Boolean,
-    mode: DatePickerMode = DatePickerMode.MONTHS,
+    //mode: DatePickerMode = DatePickerMode.MONTHS,
     onClick: (() -> Unit) = {}
 ) {
     @Composable
-    fun SurfaceForLabel(modesEnabled: Boolean, content: @Composable ()-> Unit) {
+    fun SurfaceWrapForLabel(modesEnabled: Boolean, content: @Composable ()-> Unit) {
         if (modesEnabled) {
             Surface(shape = RoundedCornerShape(6.dp), onClick = onClick) { content() }
         } else {
@@ -123,7 +119,7 @@ private fun MonthLabel(
         }
     }
 
-    SurfaceForLabel(modesEnabled = modesEnabled) {
+    SurfaceWrapForLabel(modesEnabled = modesEnabled) {
         Row(modifier = Modifier
             .padding(horizontal = 4.dp, vertical = 4.dp)
         ) {
@@ -136,7 +132,7 @@ private fun MonthLabel(
             if (modesEnabled) {
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
-                    painter = painterResource(id = if (mode == DatePickerMode.MONTHS) R.drawable.ic_arrow_drop_down_24 else R.drawable.ic_arrow_drop_up_24),
+                    painter = painterResource(id = /*if (mode == DatePickerMode.MONTHS)*/ R.drawable.ic_arrow_drop_down_24 /*else R.drawable.ic_arrow_drop_up_24*/),
                     tint = MaterialTheme.colors.onSurface, contentDescription = ""
                 )
             }
@@ -154,8 +150,4 @@ fun Preview_DatePickLayout() {
             initialPickedDate = LocalDate.now().plusDays(7)
         )
     }
-}
-
-enum class DatePickerMode {
-    MONTHS, YEARS
 }

@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun DatePickerLayoutYears(
+internal fun YearPickerLayout(
     years: List<List<Int>>,
     displayYear: Int,
     nowDate: LocalDate,
@@ -81,7 +81,7 @@ internal fun Preview_YearsLayout() {
     val colsNum = 3
     PreviewAppTheme {
         //Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-            DatePickerLayoutYears(
+            YearPickerLayout(
                 years = createYearsMatrix(dateNow, dateNow.plusYears(16), cellsNumber = colsNum),
                 displayYear = 2025,
                 nowDate = dateNow,
